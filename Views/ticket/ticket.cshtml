@@ -1,0 +1,266 @@
+@model TicketViewModel
+@{
+    ViewData["Title"] = "Crear Ticket";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Gestper</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .header {
+            background-color: #4267b2;
+            color: white;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-text {
+            font-weight: bold;
+            font-size: 18px;
+            margin-left: 8px;
+        }
+
+        .logo-subtext {
+            font-size: 10px;
+            opacity: 0.7;
+            margin-left: 5px;
+        }
+
+        .user-button {
+            background-color: white;
+            color: #4267b2;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: white;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-item {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .sidebar-item.active {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+
+        .sidebar-item a {
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 15px;
+            border-top: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        .content {
+            flex: 1;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        .form-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .form-description {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            box-sizing: border-box;
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .upload-button {
+            background-color: #4267b2;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .upload-button:hover {
+            background-color: #365899;
+        }
+
+        .upload-text {
+            font-size: 12px;
+            color: #666;
+            margin-left: 10px;
+        }
+
+        .submit-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .submit-button {
+            background-color: #4267b2;
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .submit-button:hover {
+            background-color: #365899;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" fill="white" />
+                <path d="M8 12H16M12 8V16" stroke="#4267b2" stroke-width="2" stroke-linecap="round" />
+            </svg>
+            <span class="logo-text">gestper</span>
+            <span class="logo-subtext">SISTEMA DE GESTIÓN DE PERSONAL</span>
+        </div>
+        <button class="user-button">USUARIO</button>
+    </div>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="sidebar-item">
+                <span>Lista de tickets</span>
+            </div>
+            <div class="sidebar-item active">
+                <a href="#">
+                    <span>Crear ticket</span>
+                    <span>›</span>
+                </a>
+            </div>
+            <div class="sidebar-footer">
+                <a href="#" style="text-decoration: none; color: #666;">
+                    <span>Cerrar sesión</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="form-title">Crear ticket</div>
+            <div class="form-description">
+                Utilice el formulario para crear tickets. Rellene el formulario y envíe sus tickets. Nuestro sistema de soporte responderá lo antes posible.
+            </div>
+
+            @using (Html.BeginForm("CrearTicket", "Tickets", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="form-group">
+                    <label class="form-label" for="Titulo">Título</label>
+                    @Html.TextBoxFor(m => m.Titulo, new { @class = "form-control", required = "required" })
+                    @Html.ValidationMessageFor(m => m.Titulo, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="Descripcion">Descripción</label>
+                    @Html.TextAreaFor(m => m.Descripcion, new { @class = "form-control", required = "required" })
+                    @Html.ValidationMessageFor(m => m.Descripcion, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="form-group">
+                    <button type="button" class="upload-button" onclick="document.getElementById('ArchivoAdjunto').click()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <span style="margin-left: 5px;">Subir archivos</span>
+                    </button>
+                    <input type="file" id="ArchivoAdjunto" name="ArchivoAdjunto" style="display: none;" multiple />
+                    <span class="upload-text">Opcional</span>
+                </div>
+
+                <div class="submit-container">
+                    <button type="submit" class="submit-button">CREAR TICKET</button>
+                </div>
+            }
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('ArchivoAdjunto').addEventListener('change', function() {
+            var fileCount = this.files.length;
+            var uploadText = document.querySelector('.upload-text');
+            if (fileCount > 0) {
+                uploadText.textContent = fileCount + ' archivo(s) seleccionado(s)';
+            } else {
+                uploadText.textContent = 'Opcional';
+            }
+        });
+    </script>
+</body>
+</html>
