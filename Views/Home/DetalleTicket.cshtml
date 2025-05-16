@@ -1,7 +1,7 @@
 @model Gestper.Models.Ticket
 
 @{
-    Layout = null; // Eliminamos el layout para quitar la navba
+    Layout = null; // Eliminamos el layout para eliminar la navbar
     string rol = Context.Session.GetString("UsuarioRol") ?? "";
     var trabajadores = ViewBag.Trabajadores as List<Gestper.Models.Usuario>;
     var asignado = trabajadores?.FirstOrDefault(t => t.IdUsuario == Model.IdSoporteAsignado);
