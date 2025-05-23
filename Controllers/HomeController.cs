@@ -22,6 +22,11 @@ public class HomeController : Controller
     {
         return View();
     }
+    
+    public IActionResult Bitacora()
+    {
+        return View("Bitacora");
+    }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()

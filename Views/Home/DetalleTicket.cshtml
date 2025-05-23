@@ -316,6 +316,13 @@
                                     </select>
                                 </div>
                                 
+                                @if (Model.IdEstado == 1 || Model.IdEstado == 2 || Model.IdEstado == 3)
+                                {
+                                    <div class="d-grid mb-3">
+                                        <a href="/Home/Bitacora" target="_blank" class="btn btn-secondary">Ver Bitácora</a>
+                                    </div>
+                                }
+                                
                                 <div class="d-grid">
                                     <button type="submit" class="btn btn-primary-custom">Guardar</button>
                                 </div>
