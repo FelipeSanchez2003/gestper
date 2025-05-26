@@ -27,6 +27,8 @@ namespace Gestper.Data
         public DbSet<Categoria> Categorias { get; set; }
         public DbSet<Departamento> Departamentos { get; set; }
         public DbSet<Estado> Estados { get; set;  }
+        
+        public DbSet<Bitacora> Bitacoras { get; set; }
 
     }
 
