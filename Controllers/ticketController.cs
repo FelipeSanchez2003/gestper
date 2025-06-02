@@ -61,6 +61,8 @@ namespace Gestper.Controllers
 
                 return RedirectToAction("Create", "Ticket");
             }
+            
+            ViewBag.Estados = new SelectList(new List<string> { "Todos", "Abierto", "En Proceso", "Resuelto", "Cerrado" });
 
             return View("Views/CRUD/crud.ticket.cshtml", ticketsCliente);
         }

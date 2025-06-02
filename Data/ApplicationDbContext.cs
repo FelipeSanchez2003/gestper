@@ -20,6 +20,7 @@ namespace Gestper.Data
 
 
         // Aquí defines las tablas de la base de datos.
+        public DbSet<Bitacora> Bitacora { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<Asignacion> Asignaciones { get; set; }

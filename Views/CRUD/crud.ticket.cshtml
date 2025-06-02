@@ -441,11 +441,9 @@
                     <span class="filter-label">Filtrar por estado:</span>
                     <select name="estado" class="form-select" onchange="this.form.submit()">
                         <option value="0" selected="@(ViewBag.EstadoFiltro == 0 ? "selected" : null)">Todos</option>
-                        @foreach (var estado in (SelectList)ViewBag.Estados)
+                        @foreach (var estados in (SelectList)ViewBag.Estados)
                         {
-                            <option value="@estado.Value" selected="@(ViewBag.EstadoFiltro == int.Parse(estado.Value) ? "selected" : null)">
-                                @estado.Text
-                            </option>
+                            <option value="@estados.Value">@estados.Text</option>
                         }
                     </select>
                 </form>

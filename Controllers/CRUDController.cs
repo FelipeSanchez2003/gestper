@@ -83,5 +83,82 @@ namespace Gestper.Controllers
 
             return View("Views/CRUD/crud.ticket.cshtml", tickets);
         }
+        
+        public async Task<IActionResult> Bitacora()
+        {
+            var usuarioCorreo = HttpContext.Session.GetString("UsuarioCorreo");
+            if (string.IsNullOrEmpty(usuarioCorreo))
+            {
+                return RedirectToAction("Login", "Usuario");
+            }
+
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Correo == usuarioCorreo);
+
+            if (usuario == null)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
+            ViewBag.NombreUsuario = usuario.Nombre + " " + usuario.Apellido;
+            return View("crud.bitacora");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Bitacora(string descripcion)
+        {
+            var usuarioCorreo = HttpContext.Session.GetString("UsuarioCorreo");
+            if (string.IsNullOrEmpty(usuarioCorreo))
+            {
+                return RedirectToAction("Login", "Usuario");
+            }
+
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Correo == usuarioCorreo);
+
+            if (usuario == null)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
+            var nuevaBitacora = new Bitacora
+            {
+                IdUsuario = usuario.IdUsuario,
+                FechaCreacion = DateTime.Now,
+                Descripcion = descripcion,
+                Accion = "Registro de Bitácora (Usuario)"
+            };
+
+            _context.Bitacora.Add(nuevaBitacora);
+            await _context.SaveChangesAsync();
+
+            TempData["MensajeExito"] = "Se registró la bitácora correctamente.";
+            return RedirectToAction("Perfil");
+        }
+        
+        public async Task<IActionResult> BitacorasCreadas()
+        {
+            var usuarioCorreo = HttpContext.Session.GetString("UsuarioCorreo");
+            if (string.IsNullOrEmpty(usuarioCorreo))
+            {
+                return RedirectToAction("Login", "Usuario");
+            }
+
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Correo == usuarioCorreo);
+
+            if (usuario == null)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
+            var bitacoras = await _context.Bitacora
+                .Where(b => b.IdUsuario == usuario.IdUsuario)
+                .OrderByDescending(b => b.FechaCreacion)
+                .ToListAsync();
+
+            return View("crud.bitacoralista", bitacoras);
+        }
     }
 }
