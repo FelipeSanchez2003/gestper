@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Gestper.Services;
 using System;
 
+Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.

@@ -213,48 +213,54 @@ namespace Gestper.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Ticket ticket)
         {
-            if (ModelState.IsValid)
+            try
             {
-                ticket.FechaCreacion = DateTime.Now;
-                ticket.IdEstado = 1; // Estado "Abierto"
-                ticket.IdPrioridad = 4; // Por asignar  (asignado automáticamente)
-
-                var correo = HttpContext.Session.GetString("UsuarioCorreo");
-                var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Correo == correo);
-
-                if (usuario == null)
+                if (ModelState.IsValid)
                 {
-                    TempData["LoginError"] = "Debe iniciar sesión para crear un ticket.";
-                    return RedirectToAction("Index", "Home");
+                    ticket.FechaCreacion = DateTime.Now;
+                    ticket.IdEstado = 1; 
+                    ticket.IdPrioridad = 4;
+
+                    var correo = HttpContext.Session.GetString("UsuarioCorreo");
+                    var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Correo == correo);
+
+                    if (usuario == null)
+                    {
+                        TempData["LoginError"] = "Debe iniciar sesión para crear un ticket.";
+                        return RedirectToAction("Index", "Home");
+                    }
+
+                    ticket.IdUsuario = usuario.IdUsuario;
+
+                    var tecnico = await _context.Usuarios
+                        .Where(u => u.IdRol == 2)
+                        .OrderBy(u => _context.Tickets.Count(t => t.IdSoporteAsignado == u.IdUsuario && t.IdEstado != 3))
+                        .FirstOrDefaultAsync();
+
+                    if (tecnico != null)
+                    {
+                        ticket.IdSoporteAsignado = tecnico.IdUsuario;
+                    }
+
+                    _context.Tickets.Add(ticket);
+                    await _context.SaveChangesAsync();
+
+                    TempData["SuccessMessage"] = "Ticket creado exitosamente.";
+                    return RedirectToAction("MisTickets");
                 }
-
-                ticket.IdUsuario = usuario.IdUsuario;
-
-                // Asignar trabajador con menos tickets abiertos
-                var tecnico = await _context.Usuarios
-                    .Where(u => u.IdRol == 2)
-                    .OrderBy(u => _context.Tickets.Count(t => t.IdSoporteAsignado == u.IdUsuario && t.IdEstado != 3))
-                    .FirstOrDefaultAsync();
-
-                if (tecnico != null)
-                {
-                    ticket.IdSoporteAsignado = tecnico.IdUsuario;
-                }
-
-                _context.Tickets.Add(ticket);
-                await _context.SaveChangesAsync();
-
-                TempData["SuccessMessage"] = "Ticket creado exitosamente.";
-                return RedirectToAction("MisTickets");
+            }
+            catch (Exception ex)
+            {
+                return Content("Error al crear ticket: " + ex.Message + " | " + ex.StackTrace);
             }
 
-            // Solo recargas los combos visibles
             ViewBag.Categorias =
                 new SelectList(_context.Categorias.ToList(), "IdCategoria", "Nombre", ticket.IdCategoria);
-            ViewBag.Departamentos = new SelectList(_context.Departamentos.ToList(), "IdDepartamento", "Nombre",
-                ticket.IdDepartamento);
+            ViewBag.Departamentos =
+                new SelectList(_context.Departamentos.ToList(), "IdDepartamento", "Nombre", ticket.IdDepartamento);
 
             return View(ticket);
         }
+
     }
 }
