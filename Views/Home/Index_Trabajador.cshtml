@@ -1,4 +1,4 @@
-@model (List<Gestper.Models.Ticket> Tickets, List<Gestper.Models.Bitacora> Bitacoras)
+@model List<Gestper.Models.Ticket>
 
 @{
     Layout = null;
@@ -267,54 +267,25 @@
                 <div class="tickets">
                     <table class="tickets-table">
                         <thead>
-                        <tr>
-                            <th>Título</th>
-                            <th>Descripción</th>
-                            <th>Fecha de Creación</th>
-                            <th>Acciones</th>
-                        </tr>
+                            <tr>
+                                <th>Título</th>
+                                <th>Descripción</th>
+                                <th>Fecha de Creación</th>
+                                <th>Acciones</th>
+                            </tr>
                         </thead>
                         <tbody>
-                        @foreach (var ticket in Model.Tickets)
-                        {
-                            <tr>
-                                <td>@ticket.Titulo</td>
-                                <td>@(ticket.Descripcion?.Length > 100 ? ticket.Descripcion.Substring(0, 100) + "..." : ticket.Descripcion)</td>
-                                <td>@ticket.FechaCreacion.ToString("dd-MM-yyyy")</td>
-                                <td>
-                                    <a href="@Url.Action("Detalle", "Trabajador", new { id = ticket.IdTicket })">Ver detalles</a>
-                                </td>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
-                </div>
-                <div class="main-header">
-                    <div class="main-title">Listado de Bitácoras</div>
-                </div>
-
-                <div class="tickets">
-                    <table class="tickets-table">
-                        <thead>
-                        <tr>
-                            <th>Descripción</th>
-                            <th>Usuario</th>
-                            <th>Fecha de Creación</th>
-                            <th>Acción</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        @foreach (var bitacora in Model.Bitacoras)
-                        {
-                            <tr>
-                                <td>@bitacora.Descripcion</td>
-                                <td>@bitacora.Usuario.Nombre @bitacora.Usuario.Apellido</td>
-                                <td>@bitacora.FechaCreacion.ToString("dd-MM-yyyy HH:mm")</td>
-                                <td>
-                                    <a href="@Url.Action("DetalleBitacora", "Trabajador", new { id = bitacora.Id })" class="btn btn-primary">Ver detalles</a>
-                                </td>
-                            </tr>
-                        }
+                            @foreach (var ticket in Model)
+                            {
+                                <tr>
+                                    <td>@ticket.Titulo</td>
+                                    <td>@(ticket.Descripcion?.Length > 100 ? ticket.Descripcion.Substring(0, 100) + "..." : ticket.Descripcion)</td>
+                                    <td>@ticket.FechaCreacion.ToString("dd-MM-yyyy")</td>
+                                    <td>
+                                        <a href="@Url.Action("Detalle", "Trabajador", new { id = ticket.IdTicket })">Ver detalles</a>
+                                    </td>
+                                </tr>
+                            }
                         </tbody>
                     </table>
                 </div>

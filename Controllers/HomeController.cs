@@ -29,6 +29,38 @@ namespace Gestper.Controllers
             return View();
         }
         
+        public IActionResult Bitacora()
+        {
+            // Traemos todas las entradas ordenadas por fecha descendente para la vista
+            var bitacoras = _context.Bitacoras.OrderByDescending(b => b.Fecha).ToList();
+            return View(bitacoras);
+        }
+
+        [HttpPost]
+        public IActionResult AgregarBitacora(string descripcion)
+        {
+            var rol = HttpContext.Session.GetString("UsuarioRol");
+            var nombreUsuario = HttpContext.Session.GetString("UsuarioNombre") ?? "Usuario Desconocido";
+
+            // Solo admins y trabajadores pueden agregar a la bitácora
+            if (rol == "1" || rol == "2")
+            {
+                var nuevaEntrada = new Bitacora
+                {
+                    Usuario = nombreUsuario,
+                    Fecha = DateTime.Now,
+                    Descripcion = descripcion,
+                    Accion = "Registro agregado"
+                };
+
+                _context.Bitacoras.Add(nuevaEntrada);
+                _context.SaveChanges();
+            }
+
+            // Redirigimos de nuevo a la vista Bitacora para refrescar
+            return RedirectToAction("Bitacora");
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

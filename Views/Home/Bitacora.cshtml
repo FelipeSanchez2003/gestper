@@ -16,13 +16,16 @@
             font-weight: 500;
             margin-right: 10px;
         }
+
         .bitacora-header .info {
             margin-bottom: 10px;
         }
+
         .bitacora-table th, .bitacora-table td {
             vertical-align: middle;
             text-align: left;
         }
+
         textarea.form-control {
             resize: none;
         }
@@ -32,57 +35,55 @@
     <div class="container py-4">
         <h5 class="text-primary mb-4">BITÁCORA DE TRABAJO</h5>
 
-        @if (TempData["MensajeExito"] != null)
-        {
-            <div class="alert alert-success">@TempData["MensajeExito"]</div>
-        }
-
         <!-- Datos de encabezado -->
         <div class="bitacora-header row">
-            <div class="col-md-4 info"><label>Elaborado por:</label></div>
-            <div class="col-md-4 info"><label>Fecha de creación:</label></div>
-            <div class="col-md-4 info"><label>Hora de creación:</label></div>
+            <div class="col-md-4 info"><label>Elaborado por:</label> <!-- Podrías agregar aquí el nombre de usuario --></div>
+            <div class="col-md-4 info"><label>Fecha de creación:</label> <!-- Opcional si quieres mostrar fecha creación ticket --></div>
+            <div class="col-md-4 info"><label>Hora de creación:</label> <!-- Igual --></div>
         </div>
 
-        <!-- Tabla con edición -->
+        <!-- Tabla  -->
         <table class="table table-bordered bitacora-table">
             <thead class="table-primary">
                 <tr>
                     <th style="width: 20%;">Fecha</th>
                     <th>Descripción</th>
-                    @if (rol == "1" || rol == "2" || rol == "3")
-                    {
-                        <th>Acciones</th>
-                    }
                 </tr>
             </thead>
             <tbody>
                 @foreach (var item in Model)
                 {
                     <tr>
-                        <td>@item.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
-                        <td>
-                            <form method="post" asp-action="EditarBitacora" asp-controller="Bitacora">
-                                <input type="hidden" name="id" value="@item.Id" />
-                                <textarea class="form-control" name="descripcion" rows="2">@item.Descripcion</textarea>
-                                @if (rol == "1" || rol == "2" || rol == "3")
-                                {
-                                    <button type="submit" class="btn btn-sm btn-success mt-2">Guardar</button>
-                                }
-                            </form>
-                        </td>
-                        @if (rol == "1" || rol == "2" || rol == "3")
-                        {
-                            <td><span class="text-muted">Edición directa</span></td>
-                        }
+                        <td>@item.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@item.Descripcion</td>
                     </tr>
                 }
             </tbody>
         </table>
 
-        <!-- Botón cerrar -->
-        <a href="javascript:window.close()" class="btn btn-secondary mt-3">Cerrar</a>
+        <!-- Formulario solo para administrador y trabajador -->
+        @if (rol == "1" || rol == "2")
+        {
+            <form method="post" asp-action="AgregarBitacora" asp-controller="Home">
+                <div class="mb-3">
+                    <label for="descripcion" class="form-label">Descripción</label>
+                    <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required></textarea>
+                </div>
+                <div class="d-flex gap-3">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <a href="javascript:window.close()" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        }
+        else
+        {
+            <!-- Botón cerrar solo visible para clientes -->
+            <a href="javascript:window.close()" class="btn btn-secondary mt-3">Cerrar</a>
+        }
 
+        <hr />
+
+        <!-- Botón Volver según el rol -->
         @if (rol == "1" || rol == "2")
         {
             var controlador = rol == "1" ? "HomeControllerAdmin" : "Trabajador";
