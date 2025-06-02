@@ -63,7 +63,7 @@ namespace Gestper.Controllers
             if (usuario != null && usuario.Contrasena == model.Contrasena)
             {
                 HttpContext.Session.SetString("UsuarioCorreo", usuario.Correo);
-                HttpContext.Session.SetString("UsuarioId", usuario.IdUsuario.ToString());
+                HttpContext.Session.SetInt32("UsuarioId", usuario.IdUsuario);
                 HttpContext.Session.SetString("UsuarioRol", usuario.IdRol.ToString());
 
                 return usuario.IdRol switch

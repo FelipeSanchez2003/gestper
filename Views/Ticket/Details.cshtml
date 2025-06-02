@@ -529,10 +529,9 @@
                     </a>
                     
                     @if (Model.IdEstado == 1 || Model.IdEstado == 2 || Model.IdEstado == 3)
-                    {
-                        <a href="/Home/Bitacora" target="_blank" class="btn btn-secondary">
-                            <i class="bi bi-journal-text"></i> Ver Bitácora
-                        </a>
+                    { 
+                        <a asp-controller="Seguimiento" asp-action="Index" asp-route-idTicket="@Model.IdTicket">Ver Seguimiento</a>
+
                     }
 
                 </div>

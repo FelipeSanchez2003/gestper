@@ -27,8 +27,13 @@ namespace Gestper.Models
         public int? IdSoporteAsignado { get; set; } // Nullable
 
         // Relaciones (sin atributos de validación)
+        
+        public virtual ICollection<Seguimiento>? Seguimientos { get; set; }
+        
         [ForeignKey("IdUsuario")]
         public virtual Usuario? Usuario { get; set; }
+        
+        public virtual ICollection<Bitacora>? Bitacoras { get; set; }
 
         [ForeignKey("IdEstado")]
         public virtual Estado? Estado { get; set; }

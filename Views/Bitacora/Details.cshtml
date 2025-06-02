@@ -1,0 +1,41 @@
+@model Gestper.Models.Bitacora
+
+@{
+    ViewBag.Title = "Detalles de Bitácora";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="text-primary mb-4">Detalles de Bitácora</h1>
+
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Información de la Bitácora</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">ID:</dt>
+                        <dd class="col-sm-9">@Model.Id</dd>
+
+                        <dt class="col-sm-3">Descripción:</dt>
+                        <dd class="col-sm-9">@Model.Descripcion</dd>
+
+                        <dt class="col-sm-3">Acción:</dt>
+                        <dd class="col-sm-9">@Model.Accion</dd>
+
+                        <dt class="col-sm-3">Fecha de Creación:</dt>
+                        <dd class="col-sm-9">@Model.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <a asp-controller="Bitacora" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning me-2">Editar</a>
+                <a asp-controller="Bitacora" asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger me-2">Eliminar</a>
+                <a asp-controller="Bitacora" asp-action="Index" class="btn btn-secondary">Volver a la Lista</a>
+            </div>
+        </div>
+    </div>
+</div>

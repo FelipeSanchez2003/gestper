@@ -1,0 +1,46 @@
+@model IEnumerable<Gestper.Models.Bitacora>
+
+@{
+    ViewBag.Title = "Lista de Bitácoras";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <h1 class="text-primary mb-4">Mis Bitácoras</h1>
+            <p class="mb-4">Aquí puedes ver todos los registros de bitácora que has creado.</p>
+
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info">No tienes registros de bitácora actualmente.</div>
+            }
+            else
+            {
+                <table class="table table-bordered table-hover">
+                    <thead class="table-primary">
+                    <tr>
+                        <th>ID</th>
+                        <th>Descripción</th>
+                        <th>Acción</th>
+                        <th>Fecha de Creación</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var bitacora in Model)
+                    {
+                        <tr>
+                            <td>@bitacora.Id</td>
+                            <td>@bitacora.Descripcion</td>
+                            <td>@bitacora.Accion</td>
+                            <td>@bitacora.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            }
+
+            <a asp-controller="CRUD" asp-action="Bitacora" class="btn btn-success mt-3">Registrar nueva Bitácora</a>
+        </div>
+    </div>
+</div>

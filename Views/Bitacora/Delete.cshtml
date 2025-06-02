@@ -1,0 +1,47 @@
+@model Gestper.Models.Bitacora
+
+@{
+    ViewBag.Title = "Eliminar Bitácora";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="text-danger mb-4">Eliminar Bitácora</h1>
+            <div class="alert alert-warning">
+                <strong>¿Estás seguro de que deseas eliminar esta bitácora?</strong>
+                <br>Esta acción no se puede deshacer.
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">ID:</dt>
+                        <dd class="col-sm-9">@Model.Id</dd>
+
+                        <dt class="col-sm-3">Descripción:</dt>
+                        <dd class="col-sm-9">@Model.Descripcion</dd>
+
+                        <dt class="col-sm-3">Acción:</dt>
+                        <dd class="col-sm-9">@Model.Accion</dd>
+
+                        <dt class="col-sm-3">Fecha de Creación:</dt>
+                        <dd class="col-sm-9">@Model.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</dd>
+                    </dl>
+                </div>
+            </div>
+
+            @using (Html.BeginForm("Delete", "Bitacora", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(model => model.Id)
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-danger me-2">Eliminar</button>
+                    <a asp-controller="Bitacora" asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

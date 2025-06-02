@@ -1,0 +1,27 @@
+@model IEnumerable<Gestper.Models.Ticket>
+
+<h2>Listado de Tickets</h2>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Título</th>
+        <th>Acciones</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.IdTicket</td>
+            <td>@item.Titulo</td>
+            <td>
+                <a asp-controller="Seguimiento" asp-action="Create" asp-route-idTicket="@item.IdTicket" class="btn btn-primary">
+                    Agregar Seguimiento
+                </a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

@@ -1,0 +1,28 @@
+@{
+    ViewData["Title"] = "Agregar Seguimiento";
+}
+
+<h2>Agregar Seguimiento</h2>
+
+<form asp-action="Create" method="post">
+    <input type="hidden" name="idTicket" value="@ViewBag.IdTicket" />
+
+    <div class="form-group">
+        <label>Comentario:</label>
+        <textarea class="form-control" name="comentario" rows="4" required></textarea>
+    </div>
+
+    <br />
+
+    <button type="submit" class="btn btn-success">Guardar Comentario</button>
+</form>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
