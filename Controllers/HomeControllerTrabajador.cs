@@ -15,13 +15,14 @@ namespace Gestper.Controllers
             _context = context;
         }
 
-        // AGREGADO: Se añade el parámetro "fechaBusqueda"
         public async Task<IActionResult> Index(int? idDepartamento, int? idEstado, int? idPrioridad, int? idBusqueda, DateTime? fechaBusqueda)
         {
-            if (HttpContext.Session.GetString("UsuarioRol") != "2")
-                return RedirectToAction("Login", "Usuario");
+            // Verificamos si el usuario está logueado y tiene rol de trabajador (rol 2)
+            int? idUsuario = HttpContext.Session.GetInt32("UsuarioId");
+            string rolUsuario = HttpContext.Session.GetString("UsuarioRol");
 
-            int idUsuario = int.Parse(HttpContext.Session.GetString("UsuarioId"));
+            if (idUsuario == null || rolUsuario != "2")
+                return RedirectToAction("Login", "Usuario");
 
             var ticketsQuery = _context.Tickets
                 .Include(t => t.Usuario)
@@ -41,7 +42,6 @@ namespace Gestper.Controllers
             if (idBusqueda.HasValue)
                 ticketsQuery = ticketsQuery.Where(t => t.IdTicket == idBusqueda);
 
-            // AGREGADO: filtro por fecha exacta
             if (fechaBusqueda.HasValue)
                 ticketsQuery = ticketsQuery.Where(t => t.FechaCreacion.Date == fechaBusqueda.Value.Date);
 
@@ -58,7 +58,7 @@ namespace Gestper.Controllers
 
             var usuario = await _context.Usuarios
                 .Include(u => u.Departamento)
-                .FirstOrDefaultAsync(u => u.IdUsuario == idUsuario);
+                .FirstOrDefaultAsync(u => u.IdUsuario == idUsuario.Value);
 
             ViewBag.DepartamentoNombre = usuario?.Departamento?.Nombre ?? "Sin departamento";
 

@@ -6,7 +6,7 @@
 }
 
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
     <meta charset="utf-8" />
     <title>Detalle del Ticket</title>
@@ -14,531 +14,151 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
     <style>
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            display: flex;
-            background-color: #f8f9fa;
-        }
-
-        .sidebar {
-            width: 250px;
-            background: linear-gradient(to bottom, #0d6efd, #0a58ca);
-            color: white;
-            height: 100vh;
-            padding-top: 20px;
-            position: fixed;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-            z-index: 100;
-        }
-
-        .sidebar-logo {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 0 20px;
-        }
-
-        .sidebar-logo img {
-            max-width: 150px;
-            height: auto;
-        }
-
-        .sidebar a {
-            display: flex;
-            align-items: center;
-            color: rgba(255,255,255,0.8);
-            padding: 12px 20px;
-            text-decoration: none;
-            transition: all 0.2s ease;
-            margin-bottom: 5px;
-            border-radius: 6px;
-            margin-left: 10px;
-            margin-right: 10px;
-        }
-
-        .sidebar a i {
-            margin-right: 10px;
-            font-size: 18px;
-        }
-
-        .sidebar a:hover {
-            background-color: rgba(255,255,255,0.1);
-            color: white;
-        }
-
-        .sidebar a.active {
-            background-color: rgba(255,255,255,0.2);
-            color: white;
-            font-weight: 500;
-        }
-
-        .main {
-            margin-left: 250px;
-            padding: 20px 30px;
-            flex-grow: 1;
-            min-height: 100vh;
-            transition: all 0.3s;
-        }
-
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        .page-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #212529;
-            margin: 0;
-            display: flex;
-            align-items: center;
-        }
-
-        .page-title i {
-            margin-right: 10px;
-            color: #0d6efd;
-        }
-
-        .card {
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            border: none;
-            overflow: hidden;
-            margin-bottom: 30px;
-        }
-
-        .card-header {
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #e9ecef;
-            padding: 20px 25px;
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #212529;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .card-header i {
-            margin-right: 10px;
-            color: #0d6efd;
-        }
-
-        .card-body {
-            padding: 30px;
-        }
-
-        .ticket-title {
-            font-size: 1.8rem;
-            font-weight: 600;
-            color: #212529;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .badge-container {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 30px;
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 8px 16px;
-            border-radius: 50px;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .badge i {
-            margin-right: 5px;
-        }
-
-        .badge-abierto {
-            background-color: #0dcaf0;
-            color: #fff;
-        }
-
-        .badge-proceso {
-            background-color: #ffc107;
-            color: #212529;
-        }
-
-        .badge-resuelto {
-            background-color: #198754;
-            color: #fff;
-        }
-
-        .badge-cerrado {
-            background-color: #6c757d;
-            color: #fff;
-        }
-
-        .badge-baja {
-            background-color: #20c997;
-            color: #fff;
-        }
-
-        .badge-media {
-            background-color: #fd7e14;
-            color: #fff;
-        }
-
-        .badge-alta {
-            background-color: #dc3545;
-            color: #fff;
-        }
-
-        .info-section {
-            margin-bottom: 30px;
-        }
-
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 30px;
-        }
-
-        .info-item {
-            background-color: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-        }
-
-        .info-label {
-            font-size: 0.9rem;
-            color: #6c757d;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-        }
-
-        .info-label i {
-            margin-right: 8px;
-            color: #0d6efd;
-        }
-
-        .info-value {
-            font-size: 1.1rem;
-            font-weight: 500;
-            color: #212529;
-        }
-
-        .description-section {
-            margin-bottom: 30px;
-        }
-
-        .description-label {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #212529;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-        }
-
-        .description-label i {
-            margin-right: 10px;
-            color: #0d6efd;
-        }
-
-        .description-content {
-            background-color: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            font-size: 1rem;
-            color: #495057;
-            line-height: 1.6;
-        }
-
-        .btn-primary {
-            background-color: #0d6efd;
-            border-color: #0d6efd;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: #0b5ed7;
-            border-color: #0a58ca;
-        }
-
-        .btn-secondary {
-            background-color: #6c757d;
-            border-color: #6c757d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background-color: #5c636a;
-            border-color: #565e64;
-        }
-
-        .btn-warning {
-            background-color: #ffc107;
-            border-color: #ffc107;
-            color: #212529;
-        }
-
-        .btn-warning:hover {
-            background-color: #ffca2c;
-            border-color: #ffc720;
-        }
-
-        .action-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 30px;
-        }
-
-        .action-buttons .btn {
-            min-width: 200px;
-            text-align: center;
-        }
-
-
-        @@media (max-width: 768px) {
-            .sidebar {
-                width: 70px;
-                overflow: hidden;
-            }
-
-            .sidebar-logo img {
-                max-width: 40px;
-            }
-
-            .sidebar a span {
-                display: none;
-            }
-
-            .sidebar a {
-                justify-content: center;
-                padding: 15px;
-            }
-
-            .sidebar a i {
-                margin-right: 0;
-                font-size: 20px;
-            }
-
-            .main {
-                margin-left: 70px;
-            }
-
-            .info-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-
-            .badge-container {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .action-buttons {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-            }
-        }
+        body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; display: flex; background-color: #f8f9fa; }
+        .sidebar { width: 250px; background: linear-gradient(to bottom, #0d6efd, #0a58ca); color: white; height: 100vh; padding-top: 20px; position: fixed; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 100; }
+        .sidebar-logo { text-align: center; margin-bottom: 30px; padding: 0 20px; }
+        .sidebar-logo img { max-width: 150px; height: auto; }
+        .sidebar a { display: flex; align-items: center; color: rgba(255,255,255,0.8); padding: 12px 20px; text-decoration: none; transition: 0.2s; margin-bottom: 5px; border-radius: 6px; margin-left: 10px; margin-right: 10px; }
+        .sidebar a i { margin-right: 10px; font-size: 18px; }
+        .sidebar a:hover { background-color: rgba(255,255,255,0.1); color: white; }
+        .sidebar a.active { background-color: rgba(255,255,255,0.2); font-weight: 500; }
+        .main { margin-left: 250px; padding: 20px 30px; flex-grow: 1; min-height: 100vh; }
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; margin-bottom: 20px; border-bottom: 1px solid #e9ecef; }
+        .page-title { font-size: 1.5rem; font-weight: 600; color: #212529; }
+        .page-title i { margin-right: 10px; color: #0d6efd; }
+        .card { background-color: white; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: none; margin-bottom: 30px; }
+        .card-header { background-color: #f8f9fa; border-bottom: 1px solid #e9ecef; padding: 20px 25px; font-size: 1.2rem; font-weight: 600; color: #212529; display: flex; justify-content: space-between; }
+        .card-body { padding: 30px; }
+        .ticket-title { font-size: 1.8rem; font-weight: 600; color: #212529; margin-bottom: 20px; text-align: center; }
+        .badge-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; }
+        .badge { display: inline-flex; align-items: center; padding: 8px 16px; border-radius: 50px; font-size: 0.9rem; font-weight: 500; }
+        .badge i { margin-right: 5px; }
+        .badge-abierto { background-color: #0dcaf0; color: #fff; }
+        .badge-proceso { background-color: #ffc107; color: #212529; }
+        .badge-resuelto { background-color: #198754; color: #fff; }
+        .badge-cerrado { background-color: #6c757d; color: #fff; }
+        .description-section { margin-bottom: 30px; }
+        .description-label { font-size: 1.1rem; font-weight: 600; color: #212529; margin-bottom: 15px; }
+        .description-content { background-color: #f8f9fa; border-radius: 10px; padding: 20px; font-size: 1rem; color: #495057; }
+        .tracking-line { border-left: 3px solid #0d6efd; padding-left: 25px; }
+        .tracking-circle { width: 20px; height: 20px; border-radius: 50%; position: absolute; left: -11px; top: 0; }
+        .action-buttons { display: flex; justify-content: center; gap: 15px; margin-top: 30px; }
+        .action-buttons .btn { min-width: 200px; text-align: center; }
     </style>
 </head>
+
 <body>
     <div class="sidebar">
         <div class="sidebar-logo">
             <img src="~/images/logo.png" alt="Logo Gestper" />
         </div>
-        
-        <a href="/CRUD/Perfil">
-            <i class="bi bi-person"></i>
-            <span>Perfil</span>
-        </a>
-        <a asp-controller="Ticket" asp-action="Create">
-            <i class="bi bi-ticket-perforated"></i>
-            <span>Creación de Ticket</span>
-        </a>
-        <a asp-controller="CRUD" asp-action="TicketsCreados" class="active">
-            <i class="bi bi-list-ul"></i>
-            <span>Lista de mis Tickets</span>
-        </a>
+        <a href="/CRUD/Perfil"><i class="bi bi-person"></i><span>Perfil</span></a>
+        <a asp-controller="Ticket" asp-action="Create"><i class="bi bi-ticket-perforated"></i><span>Creación de Ticket</span></a>
+        <a asp-controller="CRUD" asp-action="TicketsCreados" class="active"><i class="bi bi-list-ul"></i><span>Lista de mis Tickets</span></a>
     </div>
 
     <div class="main">
         <div class="navbar">
-            <h1 class="page-title">
-                <i class="bi bi-ticket-detailed"></i> Detalle del Ticket #@Model.IdTicket
-            </h1>
+            <h1 class="page-title"><i class="bi bi-ticket-detailed"></i> Detalle del Ticket #@Model.IdTicket</h1>
         </div>
 
         <div class="card">
             <div class="card-header">
-                <div>
-                    <i class="bi bi-info-circle"></i> Información del Ticket
-                </div>
-                
-                <div>
-                    <span class="text-muted">Creado el: @(Model.FechaCreacion != default(DateTime) ? Model.FechaCreacion.ToString("dd/MM/yyyy HH:mm") : DateTime.Now.ToString("dd/MM/yyyy HH:mm"))</span>
-                </div>
+                <div><i class="bi bi-info-circle"></i> Información del Ticket</div>
+                <div><span class="text-muted">Creado el: @Model.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</span></div>
             </div>
-            
+
             <div class="card-body">
                 <h2 class="ticket-title">@Model.Titulo</h2>
-                
+
                 <div class="badge-container">
                     @{
-                        string estadoBadgeClass = "badge-proceso";
-                        string estadoIconClass = "bi-hourglass-split";
-                        string estadoTexto = "En Proceso";
-                        
-                        if (Model.Estado != null)
+                        string estadoBadgeClass = Model.IdEstado switch
                         {
-                            // Verificar si Estado es un string o un objeto
-                            string estadoStr = Model.Estado.ToString();
-                            
-                            // Si es un objeto completo, verificar si contiene "Gestper.Models"
-                            if (estadoStr.Contains("Gestper.Models"))
-                            {
-                                estadoTexto = "En Proceso";
-                            }
-                            else if (Model.Estado.NombreEstado != null)
-                            {
-                                estadoTexto = Model.Estado.NombreEstado;
-                                
-                                switch (estadoTexto.ToLower())
-                                {
-                                    case "abierto":
-                                        estadoBadgeClass = "badge-abierto";
-                                        estadoIconClass = "bi-envelope-open";
-                                        break;
-                                    case "en proceso":
-                                        estadoBadgeClass = "badge-proceso";
-                                        estadoIconClass = "bi-hourglass-split";
-                                        break;
-                                    case "resuelto":
-                                        estadoBadgeClass = "badge-resuelto";
-                                        estadoIconClass = "bi-check-circle";
-                                        break;
-                                    case "cerrado":
-                                        estadoBadgeClass = "badge-cerrado";
-                                        estadoIconClass = "bi-x-circle";
-                                        break;
-                                    default:
-                                        estadoBadgeClass = "badge-proceso";
-                                        estadoIconClass = "bi-hourglass-split";
-                                        break;
-                                }
-                            }
-                        }
-                        
-                        string prioridadBadgeClass = "badge-media";
-                        string prioridadIconClass = "bi-dash-circle";
-                        string prioridadTexto = "Media";
-                        
-                        if (Model.Prioridad != null)
-                        {
-                            // Verificar si Prioridad es un string o un objeto
-                            string prioridadStr = Model.Prioridad.ToString();
-                            
-                            // Si es un objeto completo, verificar si contiene "Gestper.Models"
-                            if (prioridadStr.Contains("Gestper.Models"))
-                            {
-                                prioridadTexto = "Por asignar";
-                            }
-                            else if (Model.Prioridad.NombrePrioridad != null)
-                            {
-                                prioridadTexto = Model.Prioridad.NombrePrioridad;
-                                
-                                switch (prioridadTexto.ToLower())
-                                {
-                                    case "baja":
-                                        prioridadBadgeClass = "badge-baja";
-                                        prioridadIconClass = "bi-arrow-down-circle";
-                                        break;
-                                    case "media":
-                                        prioridadBadgeClass = "badge-media";
-                                        prioridadIconClass = "bi-dash-circle";
-                                        break;
-                                    case "alta":
-                                        prioridadBadgeClass = "badge-alta";
-                                        prioridadIconClass = "bi-arrow-up-circle";
-                                        break;
-                                    default:
-                                        prioridadBadgeClass = "badge-media";
-                                        prioridadIconClass = "bi-dash-circle";
-                                        break;
-                                }
-                            }
-                        }
+                            1 => "badge-abierto",
+                            2 => "badge-proceso",
+                            3 => "badge-resuelto",
+                            4 => "badge-cerrado",
+                            _ => "badge-proceso"
+                        };
                     }
-                    
-                    <span class="badge @estadoBadgeClass">
-                        <i class="bi @estadoIconClass"></i> @estadoTexto
-                    </span>
-                    
-                    <span class="badge @prioridadBadgeClass">
-                        <i class="bi @prioridadIconClass"></i> Prioridad: @prioridadTexto
-                    </span>
+                    <span class="badge @estadoBadgeClass"><i class="bi bi-circle"></i> @Model.Estado?.NombreEstado</span>
                 </div>
-                
+
                 <div class="description-section">
-                    <div class="description-label">
-                        <i class="bi bi-card-text"></i> Descripción
-                    </div>
-                    <div class="description-content">
-                        @Model.Descripcion
-                    </div>
+                    <div class="description-label"><i class="bi bi-card-text"></i> Descripción</div>
+                    <div class="description-content">@Model.Descripcion</div>
                 </div>
-                
-                <div class="info-section">
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <div class="info-label">
-                                <i class="bi bi-tag"></i> Categoría
-                            </div>
-                            <div class="info-value">
-                                @(Model.Categoria?.Nombre ?? "No especificada")
-                            </div>
-                        </div>
-                        
-                        <div class="info-item">
-                            <div class="info-label">
-                                <i class="bi bi-building"></i> Departamento
-                            </div>
-                            <div class="info-value">
-                                @(Model.Departamento?.Nombre ?? "No especificado")
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="action-buttons">
-                    <a asp-controller="Ticket" asp-action="Edit" asp-route-id="@Model.IdTicket" class="btn btn-warning">
-                        <i class="bi bi-pencil"></i> Editar Ticket
-                    </a>
-                    <a asp-controller="CRUD" asp-action="TicketsCreados" class="btn btn-secondary">
-                        <i class="bi bi-arrow-left"></i> Volver a la Lista
-                    </a>
-                    
-                    @if (Model.IdEstado == 1 || Model.IdEstado == 2 || Model.IdEstado == 3)
-                    { 
-                        <a asp-controller="Seguimiento" asp-action="Index" asp-route-idTicket="@Model.IdTicket">Ver Seguimiento</a>
 
+                <div class="description-section">
+                    <div class="description-label"><i class="bi bi-truck"></i> Seguimiento del Ticket</div>
+                    <div class="tracking-section p-4 bg-light rounded">
+                        <div class="tracking-line position-relative">
+                            @{
+                                var estadosTracking = new List<string> { "Abierto", "En Proceso", "Resuelto", "Cerrado" };
+                                int idEstadoActual = Model.IdEstado;
+                                for (int i = 0; i < estadosTracking.Count; i++)
+                                {
+                                    var estado = estadosTracking[i];
+                                    var idEstado = i + 1;
+
+                                    var circleColor = idEstadoActual > idEstado
+                                        ? "#198754"
+                                        : (idEstadoActual == idEstado ? "#ffc107" : "#6c757d");
+                            <div class="mb-4 position-relative">
+                                <div class="tracking-circle" style="background-color:@circleColor;"></div>
+                                <div class="ms-4 fw-bold">@estado</div>
+                            </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aquí empieza el módulo de seguimiento de comentarios -->
+                <div class="description-section">
+                    <div class="description-label"><i class="bi bi-chat-dots"></i> Conversación de Seguimiento</div>
+
+                    @if (Model.Seguimientos != null && Model.Seguimientos.Any())
+                    {
+                        <div class="list-group mb-3">
+                            @foreach (var seguimiento in Model.Seguimientos.OrderByDescending(s => s.Fecha))
+                            {
+                                <div class="list-group-item">
+                                    <div class="fw-bold">@seguimiento.Usuario.Nombre (@seguimiento.Fecha.ToString("dd/MM/yyyy HH:mm"))</div>
+                                    <div>@seguimiento.Comentario</div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-light">No hay comentarios aún.</div>
                     }
 
+                    @if (Model.IdEstado != 4)
+                    {
+                        <form asp-action="AgregarSeguimiento" method="post" class="mt-3">
+                            <input type="hidden" name="idTicket" value="@Model.IdTicket" />
+                            <div class="mb-3">
+                                <textarea class="form-control" name="comentario" placeholder="Escribe un comentario..." rows="3" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Enviar comentario</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">Este ticket está cerrado, ya no se pueden agregar comentarios.</div>
+                    }
                 </div>
+
+                <div class="action-buttons">
+                    <a href="/Ticket/Edit/@Model.IdTicket" class="btn btn-warning"><i class="bi bi-pencil"></i> Editar Ticket</a>
+                    <a href="/CRUD/TicketsCreados" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Volver a la Lista</a>
+                </div>
+
             </div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

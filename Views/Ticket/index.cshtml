@@ -45,9 +45,20 @@
                                 <td>@ticket.Descripcion</td>
                                 <td>@ticket.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td>
-                                    <a asp-controller="Ticket" asp-action="Details" asp-route-id="@ticket.IdTicket" class="btn btn-sm btn-info me-1">Ver</a>
-                                    <a asp-controller="Ticket" asp-action="Edit" asp-route-id="@ticket.IdTicket" class="btn btn-sm btn-warning me-1">Editar</a>
-                                    <a asp-controller="Ticket" asp-action="Delete" asp-route-id="@ticket.IdTicket" class="btn btn-sm btn-danger">Eliminar</a>
+                                    <a class="btn btn-info btn-sm" asp-action="Details" asp-route-id="@ticket.IdTicket">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+
+                                    @if (ticket.Estado?.NombreEstado != "Cerrado")
+                                    {
+                                        <a class="btn btn-warning btn-sm" asp-action="Edit" asp-route-id="@ticket.IdTicket">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    }
+
+                                    <form asp-action="Delete" asp-route-id="@ticket.IdTicket" method="post" class="d-inline" onsubmit="return confirm('¿Eliminar este ticket?');">
+                                        <button class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
+                                    </form>
                                 </td>
                             </tr>
                         }

@@ -3,11 +3,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Gestper.Models;
 using Gestper.Data;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 using Gestper.Services;
-using System.Threading.Tasks;
-using System;
-using System.Linq;
+
 
 namespace Gestper.Controllers
 {
@@ -29,21 +26,17 @@ namespace Gestper.Controllers
             return usuario?.IdUsuario ?? 0;
         }
 
-        public async Task<IActionResult> Index()
+        // Método centralizado para cargar los combos
+        private void CargarCombos(Ticket ticket = null)
         {
-            var tickets = await _context.Tickets
-                .Include(t => t.Estado)
-                .Include(t => t.Categoria)
-                .Include(t => t.Prioridad)
-                .Include(t => t.Departamento)
-                .ToListAsync();
-
-            return View();
+            ViewBag.Estados = new SelectList(_context.Estados.ToList(), "IdEstado", "NombreEstado", ticket?.IdEstado);
+            ViewBag.Categorias = new SelectList(_context.Categorias.ToList(), "IdCategoria", "Nombre", ticket?.IdCategoria);
+            ViewBag.Prioridades = new SelectList(_context.Prioridades.ToList(), "IdPrioridad", "NombrePrioridad", ticket?.IdPrioridad);
+            ViewBag.Departamentos = new SelectList(_context.Departamentos.ToList(), "IdDepartamento", "Nombre", ticket?.IdDepartamento);
         }
 
         public IActionResult MisTickets()
         {
-
             int idUsuario = ObtenerIdUsuarioActual();
             if (idUsuario == 0) return Unauthorized();
 
@@ -55,22 +48,23 @@ namespace Gestper.Controllers
                 .Where(t => t.IdUsuario == idUsuario)
                 .ToList();
 
-
             if (!ticketsCliente.Any())
             {
-
                 return RedirectToAction("Create", "Ticket");
             }
 
+            // Siempre cargamos los combos antes de enviar la vista
+            CargarCombos();
             return View("Views/CRUD/crud.ticket.cshtml", ticketsCliente);
         }
+
         public async Task<IActionResult> Details(int id)
         {
             var ticket = await _context.Tickets
                 .Include(t => t.Estado)
-                .Include(t => t.Categoria)
                 .Include(t => t.Prioridad)
-                .Include(t => t.Departamento)
+                .Include(t => t.Seguimientos)
+                .ThenInclude(s => s.Usuario)
                 .FirstOrDefaultAsync(t => t.IdTicket == id);
 
             if (ticket == null)
@@ -78,8 +72,7 @@ namespace Gestper.Controllers
 
             return View(ticket);
         }
-
-
+        
         public async Task<IActionResult> Edit(int id)
         {
             var ticket = await _context.Tickets
@@ -91,21 +84,16 @@ namespace Gestper.Controllers
 
             if (ticket == null)
                 return NotFound();
-            
+
             var trabajadores = await _context.Usuarios
                 .Where(u => u.IdRol == 2 && u.IdDepartamento == ticket.IdDepartamento)
                 .ToListAsync();
 
             ViewBag.Trabajadores = trabajadores;
 
-            ViewBag.Estados = new SelectList(await _context.Estados.ToListAsync(), "IdEstado", "NombreEstado", ticket.IdEstado);
-            ViewBag.Categorias = new SelectList(await _context.Categorias.ToListAsync(), "IdCategoria", "Nombre", ticket.IdCategoria);
-            ViewBag.Prioridades = new SelectList(await _context.Prioridades.ToListAsync(), "IdPrioridad", "NombrePrioridad", ticket.IdPrioridad);
-            ViewBag.Departamentos = new SelectList(await _context.Departamentos.ToListAsync(), "IdDepartamento", "Nombre", ticket.IdDepartamento);
-
+            CargarCombos(ticket);
             return View(ticket);
         }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -120,7 +108,6 @@ namespace Gestper.Controllers
 
                 try
                 {
-                    // Actualizar solo campos editables
                     ticketExistente.Titulo = ticket.Titulo;
                     ticketExistente.Descripcion = ticket.Descripcion;
                     ticketExistente.IdCategoria = ticket.IdCategoria;
@@ -141,71 +128,15 @@ namespace Gestper.Controllers
                 return RedirectToAction("MisTickets");
             }
 
-            
-            ViewBag.Estados = new SelectList(await _context.Estados.ToListAsync(), "IdEstado", "NombreEstado", ticket.IdEstado);
-            ViewBag.Categorias = new SelectList(await _context.Categorias.ToListAsync(), "IdCategoria", "Nombre", ticket.IdCategoria);
-            ViewBag.Prioridades = new SelectList(await _context.Prioridades.ToListAsync(), "IdPrioridad", "NombrePrioridad", ticket.IdPrioridad);
-            ViewBag.Departamentos = new SelectList(await _context.Departamentos.ToListAsync(), "IdDepartamento", "Nombre", ticket.IdDepartamento);
-
+            CargarCombos(ticket);
             return View(ticket);
-        }
-
-        public IActionResult Lista(string estado = "Todos", int pagina = 1)
-        {
-            int pageSize = 5;
-            var tickets = _context.Tickets.Include(t => t.Estado).AsQueryable();
-
-            if (estado != "Todos")
-                tickets = tickets.Where(t => t.Estado.NombreEstado == estado);
-
-            var totalTickets = tickets.Count();
-            var totalPaginas = (int)Math.Ceiling(totalTickets / (double)pageSize);
-
-            var ticketsPaginados = tickets
-                .OrderByDescending(t => t.FechaCreacion)
-                .Skip((pagina - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
-
-            ViewBag.EstadoFiltro = estado;
-            ViewBag.PaginaActual = pagina;
-            ViewBag.TotalPaginas = totalPaginas;
-
-            return View(ticketsPaginados);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var ticket = await _context.Tickets.FindAsync(id);
-            if (ticket == null) return NotFound();
-
-            _context.Tickets.Remove(ticket);
-            await _context.SaveChangesAsync();
-            return RedirectToAction("MisTickets");
         }
 
         public IActionResult Create()
         {
-            var estados = _context.Estados.ToList();
-            var categorias = _context.Categorias.ToList();
-            var prioridades = _context.Prioridades.ToList();
-            var departamentos = _context.Departamentos.ToList();
-
-            if (!estados.Any() || !categorias.Any() || !prioridades.Any() || !departamentos.Any())
-            {
-                return RedirectToAction("Error", "Home");
-            }
-
-            ViewBag.Estados = new SelectList(estados, "IdEstado", "NombreEstado");
-            ViewBag.Categorias = new SelectList(categorias, "IdCategoria", "Nombre");
-            ViewBag.Prioridades = new SelectList(prioridades, "IdPrioridad", "NombrePrioridad");
-            ViewBag.Departamentos = new SelectList(departamentos, "IdDepartamento", "Nombre");
-
+            CargarCombos();
             return View();
         }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -214,8 +145,8 @@ namespace Gestper.Controllers
             if (ModelState.IsValid)
             {
                 ticket.FechaCreacion = DateTime.Now;
-                ticket.IdEstado = 1; // Estado "Abierto"
-                ticket.IdPrioridad = 4; // Por asignar  (asignado automáticamente)
+                ticket.IdEstado = 1;
+                ticket.IdPrioridad = 4;
 
                 var correo = HttpContext.Session.GetString("UsuarioCorreo");
                 var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Correo == correo);
@@ -228,7 +159,6 @@ namespace Gestper.Controllers
 
                 ticket.IdUsuario = usuario.IdUsuario;
 
-                // Asignar trabajador con menos tickets abiertos
                 var tecnico = await _context.Usuarios
                     .Where(u => u.IdRol == 2)
                     .OrderBy(u => _context.Tickets.Count(t => t.IdSoporteAsignado == u.IdUsuario && t.IdEstado != 3))
@@ -246,13 +176,59 @@ namespace Gestper.Controllers
                 return RedirectToAction("MisTickets");
             }
 
-            // Solo recargas los combos visibles
-            ViewBag.Categorias =
-                new SelectList(_context.Categorias.ToList(), "IdCategoria", "Nombre", ticket.IdCategoria);
-            ViewBag.Departamentos = new SelectList(_context.Departamentos.ToList(), "IdDepartamento", "Nombre",
-                ticket.IdDepartamento);
-
+            CargarCombos(ticket);
             return View(ticket);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var ticket = await _context.Tickets.FindAsync(id);
+            if (ticket == null) return NotFound();
+
+            _context.Tickets.Remove(ticket);
+            await _context.SaveChangesAsync();
+            return RedirectToAction("MisTickets");
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AgregarSeguimiento(int idTicket, string comentario)
+        {
+            if (string.IsNullOrWhiteSpace(comentario))
+            {
+                TempData["Error"] = "El comentario no puede estar vacío.";
+                return RedirectToAction("Details", new { id = idTicket });
+            }
+
+            var ticket = await _context.Tickets.FindAsync(idTicket);
+            if (ticket == null || ticket.IdEstado == 4)
+            {
+                TempData["Error"] = "No se puede agregar seguimiento a este ticket.";
+                return RedirectToAction("Details", new { id = idTicket });
+            }
+
+            var usuarioCorreo = HttpContext.Session.GetString("UsuarioCorreo");
+            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Correo == usuarioCorreo);
+
+            if (usuario == null)
+            {
+                TempData["Error"] = "Debe iniciar sesión para agregar comentarios.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var seguimiento = new Seguimiento
+            {
+                IdTicket = idTicket,
+                IdUsuario = usuario.IdUsuario,
+                Fecha = DateTime.Now,
+                Comentario = comentario
+            };
+
+            _context.Seguimientos.Add(seguimiento);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", new { id = idTicket });
         }
     }
 }
