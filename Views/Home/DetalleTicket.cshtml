@@ -1,11 +1,11 @@
 @model Gestper.Models.Ticket
 
 @{
-    Layout = null; // Eliminamos el layout para eliminar la navbar
+    Layout = null;
     string rol = Context.Session.GetString("UsuarioRol") ?? "";
     var trabajadores = ViewBag.Trabajadores as List<Gestper.Models.Usuario>;
     var asignado = trabajadores?.FirstOrDefault(t => t.IdUsuario == Model.IdSoporteAsignado);
-    var controlador = Context.Session.GetString("UsuarioRol") == "1" ? "HomeControllerAdmin" : "Trabajador";
+    var controlador = "HomeControllerAdmin";
 }
 
 <!DOCTYPE html>
@@ -14,250 +14,77 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gestión del Ticket</title>
-    
-    <!-- Incluir Bootstrap CSS -->
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
-        body {
-            background-color: #f8f9fa;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* Estilos para el panel lateral */
-        .sidebar {
-            width: 250px;
-            background-color: #0074e8; /* Color azul del logo gestper */
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center; /* Centrar verticalmente */
-            position: fixed;
-            height: 100vh;
-            left: 0;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .logo-container {
-            text-align: center;
-            padding: 0 15px;
-        }
-
-        .logo {
-            width: 100%;
-            max-width: 180px;
-            height: auto;
-            object-fit: contain;
-        }
-
-        /* Estilos para el contenido principal */
-        .content-wrapper {
-            flex: 1;
-            margin-left: 250px; /* Mismo ancho que el sidebar */
-            width: calc(100% - 250px);
-        }
-
-        .main-content {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 40px 30px;
-            min-height: 100vh;
-        }
-
-        .card-container {
-            width: 100%;
-            max-width: 1400px; /* Contenedor más grande */
-        }
-
-        .card {
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e9ecef;
-        }
-
-        .bg-primary-light {
-            background-color: #e6eeff;
-        }
-
-        .text-primary-custom {
-            color: #0074e8; /* Color azul exacto del logo */
-        }
-
-        .btn-primary-custom {
-            background-color: #0074e8; /* Color azul exacto del logo */
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 12px; /* Botón más grande */
-            font-size: 16px;
-        }
-
-        .btn-primary-custom:hover {
-            background-color: #0062c4; /* Versión más oscura para hover */
-        }
-
-        .form-control, .form-select {
-            border-radius: 4px;
-            padding: 10px 12px; /* Campos más grandes */
-            border: 1px solid #ced4da;
-            font-size: 16px;
-        }
-
-        .form-label {
-            font-weight: normal;
-            margin-bottom: 8px;
-            font-size: 16px;
-        }
-
-        .volver-link {
-            color: #333;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 18px;
-            display: inline-flex;
-            align-items: center; 
-            gap: 8px;
-        }
-
-        .volver-icon {
-            font-size: 18px; 
-            color: #333;
-            line-height: 1;
-        }
-
-
-        .info-label {
-            font-weight: bold;
-            margin-bottom: 0;
-            font-size: 16px;
-        }
-
-        .info-value {
-            margin-bottom: 15px;
-            font-size: 16px;
-        }
-
-        .ticket-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .ticket-icon {
-            font-size: 24px;
-            color: #0074e8;
-        }
-
-        /* Responsive para el sidebar */
-        @@media (max-width: 991px) {
-            .sidebar {
-                width: 70px;
-            }
-            
-            .logo {
-                width: 50px;
-            }
-            
-            .content-wrapper {
-                margin-left: 70px;
-                width: calc(100% - 70px);
-            }
-        }
-
-        /* Aumentar el tamaño de los elementos en pantallas grandes */
-        @@media (min-width: 1200px) {
-            .card-container {
-                max-width: 80%; /* Usar porcentaje para adaptarse mejor */
-            }
-            
-            .form-control, .form-select {
-                padding: 12px 15px;
-            }
-            
-            h5.text-primary-custom {
-                font-size: 24px;
-                margin-bottom: 20px;
-            }
-        }
+        body { background-color: #f8f9fa; margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; display: flex; min-height: 100vh; }
+        .sidebar { width: 250px; background-color: #0074e8; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; position: fixed; height: 100vh; left: 0; top: 0; z-index: 1000; }
+        .logo-container { text-align: center; padding: 0 15px; }
+        .logo { width: 100%; max-width: 180px; height: auto; object-fit: contain; }
+        .content-wrapper { flex: 1; margin-left: 250px; width: calc(100% - 250px); }
+        .main-content { display: flex; justify-content: center; align-items: center; padding: 40px 30px; min-height: 100vh; }
+        .card-container { width: 100%; max-width: 1400px; }
+        .card { border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); border: 1px solid #e9ecef; }
+        .bg-primary-light { background-color: #e6eeff; }
+        .text-primary-custom { color: #0074e8; }
+        .btn-primary-custom { background-color: #0074e8; color: white; border: none; border-radius: 4px; padding: 12px; font-size: 16px; }
+        .btn-primary-custom:hover { background-color: #0062c4; }
+        .form-control, .form-select { border-radius: 4px; padding: 10px 12px; border: 1px solid #ced4da; font-size: 16px; }
+        .form-label { font-weight: normal; margin-bottom: 8px; font-size: 16px; }
+        .volver-link { color: #333; text-decoration: none; font-weight: 600; font-size: 18px; display: inline-flex; align-items: center; gap: 8px; }
+        .info-label { font-weight: bold; margin-bottom: 0; font-size: 16px; }
+        .info-value { margin-bottom: 15px; font-size: 16px; }
+        .ticket-title { display: flex; align-items: center; gap: 10px; }
+        .ticket-icon { font-size: 24px; color: #0074e8; }
     </style>
 </head>
+
 <body>
-    <!-- Panel lateral -->
     <div class="sidebar">
         <div class="logo-container">
             <img src="/Images/logo.png" alt="Gestper Logo" class="logo">
         </div>
     </div>
 
-    <!-- Contenedor principal -->
     <div class="content-wrapper">
-        <!-- Contenido principal -->
         <div class="main-content">
             <div class="card-container">
                 <div class="card">
                     <div class="row g-0">
+
                         <!-- Panel Izquierdo -->
                         <div class="col-md-3 p-4 bg-primary-light">
                             <div class="mb-4">
-                                @if (rol == "1")
-                                {
-                                    <a asp-controller="HomeControllerAdmin" asp-action="Index" class="volver-link">
-                                        <i class="fas fa-chevron-left"></i>
-                                        <span>Volver</span>
-                                    </a>
-                                }
-                                else if (rol == "2")
-                                {
-                                    <a asp-controller="Trabajador" asp-action="Index" class="volver-link">
-                                        <i class="fas fa-chevron-left"></i>
-                                        <span>Volver</span>
-                                    </a>
-                                }
-                                else
-                                {
-                                    <!-- Fallback para otros roles o si no hay rol definido -->
-                                    <a href="javascript:history.back()" class="volver-link">
-                                        <i class="fas fa-chevron-left"></i>
-                                        <span>Volver</span>
-                                    </a>
-                                }
+                                <a asp-controller="HomeControllerAdmin" asp-action="Index" class="volver-link">
+                                    <i class="fas fa-chevron-left"></i> <span>Volver</span>
+                                </a>
                             </div>
 
                             <div class="mt-4">
                                 <p class="info-label">ID del ticket</p>
                                 <p class="info-value">@Model.IdTicket</p>
-                                
                                 <p class="info-label">Creado por</p>
                                 <p class="info-value">@Model.Usuario?.Nombre @Model.Usuario?.Apellido</p>
-                                
                                 <p class="info-label">Correo</p>
                                 <p class="info-value">@Model.Usuario?.Correo</p>
-                                
                                 <p class="info-label">Telefono</p>
                                 <p class="info-value">@Model.Usuario?.Telefono</p>
-                                
                                 <p class="info-label">Fecha de creación</p>
                                 <p class="info-value">@Model.FechaCreacion.ToString("dd/MM/yyyy")</p>
                             </div>
                         </div>
 
                         <!-- Panel Derecho -->
-                        <div class="col-md-9 p-5"> <!-- Aumentado el padding para más espacio -->
+                        <div class="col-md-9 p-5">
+
+                            <!-- FORMULARIO DE EDICIÓN -->
                             <div class="ticket-title mb-4">
                                 <i class="fas fa-ticket-alt ticket-icon"></i>
                                 <h5 class="text-primary-custom mb-0">Gestionar ticket</h5>
                             </div>
-                            
+
                             <form asp-action="Guardar" asp-controller="@controlador" method="post">
                                 <input type="hidden" name="IdTicket" value="@Model.IdTicket" />
 
@@ -270,31 +97,20 @@
                                     <label class="form-label">Descripción</label>
                                     <textarea class="form-control" name="Descripcion" rows="4">@Model.Descripcion</textarea>
                                 </div>
-                                
-                                @if (rol == "2")
-                                {
-                                    <div class="mb-3 d-none">
-                                        <label class="form-label">Asignado a</label>
-                                        <input type="text" class="form-control" value="@($"{asignado?.Nombre} {asignado?.Apellido}")" readonly />
-                                        <input type="hidden" name="IdSoporteAsignado" value="@Model.IdSoporteAsignado" />
-                                    </div>
-                                }
-                                else
-                                {
-                                    <div class="mb-4">
-                                        <label class="form-label">Asignado a</label>
-                                        <select class="form-select" name="IdSoporteAsignado">
-                                            <option value="">Sin asignar</option>
-                                            @foreach (var trabajador in trabajadores ?? new List<Gestper.Models.Usuario>())
-                                            {
-                                                <option value="@trabajador.IdUsuario" selected="@(Model.IdSoporteAsignado == trabajador.IdUsuario)">
-                                                    @trabajador.Nombre @trabajador.Apellido
-                                                </option>
-                                            }
-                                        </select>
-                                    </div>
-                                }
-                                
+
+                                <div class="mb-4">
+                                    <label class="form-label">Asignado a</label>
+                                    <select class="form-select" name="IdSoporteAsignado">
+                                        <option value="">Sin asignar</option>
+                                        @foreach (var trabajador in trabajadores ?? new List<Gestper.Models.Usuario>())
+                                        {
+                                            <option value="@trabajador.IdUsuario" selected="@(Model.IdSoporteAsignado == trabajador.IdUsuario)">
+                                                @trabajador.Nombre @trabajador.Apellido
+                                            </option>
+                                        }
+                                    </select>
+                                </div>
+
                                 <div class="mb-4">
                                     <label class="form-label">Prioridad</label>
                                     <select class="form-select" name="IdPrioridad">
@@ -303,7 +119,7 @@
                                         <option value="1" selected="@(Model.IdPrioridad == 1)">Alta</option>
                                     </select>
                                 </div>
-                                
+
                                 <div class="mb-5">
                                     <label class="form-label">Estado</label>
                                     <select class="form-select" name="IdEstado">
@@ -315,26 +131,58 @@
                                         }
                                     </select>
                                 </div>
-                                
-                                @if (Model.IdEstado == 1 || Model.IdEstado == 2 || Model.IdEstado == 3)
-                                {
-                                    <div class="d-grid mb-3">
-                                        <a href="/Home/Bitacora" target="_blank" class="btn btn-secondary">Ver Bitácora</a>
-                                    </div>
-                                }
-                                
+
                                 <div class="d-grid">
                                     <button type="submit" class="btn btn-primary-custom">Guardar</button>
                                 </div>
                             </form>
+
+                            <!-- SECCIÓN DE SEGUIMIENTO -->
+                            <hr class="my-4" />
+                            <div class="ticket-title mb-3">
+                                <i class="fas fa-comments ticket-icon"></i>
+                                <h5 class="text-primary-custom mb-0">Conversación de Seguimiento</h5>
+                            </div>
+
+                            @if (Model.Seguimientos != null && Model.Seguimientos.Any())
+                            {
+                                <div class="list-group mb-3">
+                                    @foreach (var seguimiento in Model.Seguimientos.OrderByDescending(s => s.Fecha))
+                                    {
+                                        <div class="list-group-item">
+                                            <div class="fw-bold">@seguimiento.Usuario.Nombre (@seguimiento.Fecha.ToString("dd/MM/yyyy HH:mm"))</div>
+                                            <div>@seguimiento.Comentario</div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-light">No hay comentarios aún.</div>
+                            }
+
+                            @if (Model.IdEstado != 4)
+                            {
+                                <form asp-action="AgregarSeguimiento" method="post" class="mt-3">
+                                    <input type="hidden" name="idTicket" value="@Model.IdTicket" />
+                                    <div class="mb-3">
+                                        <textarea class="form-control" name="comentario" placeholder="Escribe una respuesta..." rows="3" required></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary-custom">Enviar respuesta</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <div class="alert alert-warning">Este ticket está cerrado. Ya no se pueden agregar respuestas.</div>
+                            }
+
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- Incluir Bootstrap JS -->
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

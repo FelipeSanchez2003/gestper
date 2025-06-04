@@ -4,103 +4,867 @@
     Layout = null;
     var estadoFiltro = ViewBag.EstadoFiltro as string ?? "Todos";
     var estadosSelectList = ViewBag.Estados as SelectList ?? new SelectList(new List<SelectListItem>());
+
+    // Manejo seguro de nulos para evitar warnings de nullable reference types
+    var totalTickets = Model?.Count ?? 0;
+    var ticketsAbiertos = Model?.Where(t => t.Estado?.NombreEstado == "Abierto").Count() ?? 0;
+    var ticketsEnProceso = Model?.Where(t => t.Estado?.NombreEstado == "En Proceso").Count() ?? 0;
+    var ticketsResueltos = Model?.Where(t => t.Estado?.NombreEstado == "Resuelto").Count() ?? 0;
 }
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8" />
-    <title>Mis Tickets</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mis Tickets - Gestper</title>
+
+    <!-- Bootstrap CSS - Versión local para evitar errores de HTTP -->
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Font Awesome - Versión local -->
+    <link href="~/lib/fontawesome/css/all.min.css" rel="stylesheet" />
+    <!-- Google Fonts con preconnect para mejor rendimiento -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        body { background-color: #f8f9fa; padding: 20px; font-family: 'Segoe UI'; }
-        .badge { font-size: 0.9rem; }
-        .btn { margin-right: 5px; }
-        .table td, .table th { vertical-align: middle; }
+        /* Estilos base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #343a40;
+            line-height: 1.6;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 280px;
+            background: linear-gradient(180deg, #0074e8 0%, #0062c4 100%);
+            color: #ffffff;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 2rem 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            width: 120px;
+            height: auto;
+            filter: brightness(0) invert(1);
+            max-width: 100%;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .nav-item {
+            margin: 0.5rem 1rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            transform: translateX(5px);
+        }
+
+        .nav-link i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Contenido principal */
+        .main-content {
+            margin-left: 280px;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        /* Header de página */
+        .page-header {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e9ecef;
+        }
+
+        .page-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .page-title h1 {
+            color: #0074e8;
+            font-weight: 700;
+            font-size: 2rem;
+            margin: 0;
+        }
+
+        .page-title .icon {
+            width: 48px;
+            height: 48px;
+            background: #e6eeff;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0074e8;
+            font-size: 1.5rem;
+        }
+
+        /* Tarjetas de estadísticas */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #0074e8;
+        }
+
+        .stat-card.primary::before {
+            background: #0074e8;
+        }
+
+        .stat-card.info::before {
+            background: #17a2b8;
+        }
+
+        .stat-card.warning::before {
+            background: #ffc107;
+        }
+
+        .stat-card.success::before {
+            background: #28a745;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #343a40;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Sección de controles */
+        .controls-section {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e9ecef;
+        }
+
+        .controls-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .filter-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: #343a40;
+            white-space: nowrap;
+        }
+
+        .form-select {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background-color: #ffffff;
+        }
+
+        .form-select:focus {
+            border-color: #0074e8;
+            box-shadow: 0 0 0 0.2rem rgba(0, 116, 232, 0.25);
+            outline: none;
+        }
+
+        .btn-gestper {
+            background: #0074e8;
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .btn-gestper:hover {
+            background: #0062c4;
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Contenedor de tickets */
+        .tickets-container {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .ticket-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ticket-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .ticket-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #343a40;
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .ticket-id {
+            background: #e6eeff;
+            color: #0074e8;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .ticket-description {
+            color: #6c757d;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .ticket-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .ticket-date {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-abierto {
+            background: rgba(23, 162, 184, 0.1);
+            color: #17a2b8;
+            border: 1px solid rgba(23, 162, 184, 0.2);
+        }
+
+        .status-proceso {
+            background: rgba(255, 193, 7, 0.1);
+            color: #856404;
+            border: 1px solid rgba(255, 193, 7, 0.2);
+        }
+
+        .status-resuelto {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+            border: 1px solid rgba(40, 167, 69, 0.2);
+        }
+
+        .status-cerrado {
+            background: rgba(108, 117, 125, 0.1);
+            color: #6c757d;
+            border: 1px solid rgba(108, 117, 125, 0.2);
+        }
+
+        .ticket-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-view {
+            background: rgba(0, 116, 232, 0.1);
+            color: #0074e8;
+            border: 1px solid rgba(0, 116, 232, 0.2);
+        }
+
+        .btn-view:hover {
+            background: #0074e8;
+            color: #ffffff;
+        }
+
+        .btn-edit {
+            background: rgba(255, 193, 7, 0.1);
+            color: #856404;
+            border: 1px solid rgba(255, 193, 7, 0.2);
+        }
+
+        .btn-edit:hover {
+            background: #ffc107;
+            color: #343a40;
+        }
+
+        .btn-delete {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.2);
+        }
+
+        .btn-delete:hover {
+            background: #dc3545;
+            color: #ffffff;
+        }
+
+        /* Estado vacío */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e9ecef;
+        }
+
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            background: #e6eeff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: #0074e8;
+            font-size: 2rem;
+        }
+
+        .empty-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #343a40;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-description {
+            color: #6c757d;
+            margin-bottom: 2rem;
+        }
+
+        /* Animación de carga */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: gestper-spin 1s ease-in-out infinite;
+        }
+
+        /* Animaciones */
+        .fade-in {
+            animation: gestper-fadeIn 0.5s ease-in;
+        }
+
+        /* Definición de keyframes con nombres únicos */
+        @@keyframes gestper-spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @@keyframes gestper-fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Media queries corregidas */
+        @@media screen and (max-width: 768px) {
+        .sidebar {
+            transform: translateX(-100%);
+        }
+
+        .main-content {
+            margin-left: 0;
+            padding: 1rem;
+        }
+
+        .controls-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .filter-section {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .stats-container {
+            grid-template-columns: 1fr;
+        }
+
+        .ticket-actions {
+            justify-content: center;
+        }
+
+        .page-title {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .page-title h1 {
+            font-size: 1.5rem;
+        }
+        }
+
+        @@media screen and (max-width: 480px) {
+        .main-content {
+            padding: 0.5rem;
+        }
+
+        .page-header {
+            padding: 1rem;
+        }
+
+        .stat-card {
+            padding: 1rem;
+        }
+
+        .ticket-card {
+            padding: 1rem;
+        }
+        }
+
+        /* Mejoras de accesibilidad */
+        .btn-gestper:focus,
+        .btn-action:focus,
+        .form-select:focus {
+            outline: 2px solid #0074e8;
+            outline-offset: 2px;
+        }
+
+        /* Prevenir problemas de overflow */
+        .ticket-title,
+        .ticket-description {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        /* Asegurar que las imágenes sean responsivas */
+        img {
+            max-width: 100%;
+            height: auto;
+        }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <h2 class="mb-4"><i class="bi bi-ticket-perforated"></i> Mis Tickets</h2>
-
-        <div class="d-flex justify-content-between mb-4">
-            <form method="get" class="d-flex">
-                <label class="me-2 fw-bold">Filtrar por Estado:</label>
-                <select name="estado" class="form-select me-2" style="width: 200px;" onchange="this.form.submit()">
-                    <option value="Todos" selected="@(estadoFiltro == "Todos" ? "selected" : null)">Todos</option>
-                    @foreach (var estado in estadosSelectList)
-                    {
-                        var isSelected = estadoFiltro == estado.Text;
-                        <option value="@estado.Text" selected="@(isSelected ? "selected" : null)">@estado.Text</option>
-                    }
-                </select>
-            </form>
-
-
-
-            <a class="btn btn-success" asp-controller="Ticket" asp-action="Create">
-                <i class="bi bi-plus-circle"></i> Nuevo Ticket
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="sidebar-header">
+        <img src="~/Images/logo.png" alt="Gestper Logo" class="logo"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+        <div style="display: none; color: white; font-weight: bold; font-size: 1.5rem;">GESTPER</div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-item">
+            <a href="@Url.Action("Index", "Ticket")" class="nav-link active">
+                <i class="fas fa-ticket-alt" aria-hidden="true"></i>
+                <span>Mis Tickets</span>
             </a>
         </div>
+        <div class="nav-item">
+            <a href="/CRUD/Perfil" class="nav-link">
+                <i class="bi bi-person"></i>
+                <span>Perfil</span>
+            </a>
+        </div>
+        
+    </nav>
+</div>
 
+<!-- Main Content -->
+<main class="main-content">
+    <!-- Page Header -->
+    <header class="page-header fade-in">
+        <div class="page-title">
+            <div class="icon" aria-hidden="true">
+                <i class="fas fa-ticket-alt"></i>
+            </div>
+            <div>
+                <h1>Mis Tickets</h1>
+                <p class="mb-0 text-muted">Gestiona y da seguimiento a tus solicitudes</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Stats Cards -->
+    <section class="stats-container fade-in" aria-label="Estadísticas de tickets">
+        <div class="stat-card primary">
+            <div class="stat-header">
+                <div class="stat-icon" style="background: #e6eeff; color: #0074e8;" aria-hidden="true">
+                    <i class="fas fa-ticket-alt"></i>
+                </div>
+            </div>
+            <div class="stat-number">@totalTickets</div>
+            <div class="stat-label">Total de Tickets</div>
+        </div>
+
+        <div class="stat-card info">
+            <div class="stat-header">
+                <div class="stat-icon" style="background: rgba(23, 162, 184, 0.1); color: #17a2b8;" aria-hidden="true">
+                    <i class="fas fa-clock"></i>
+                </div>
+            </div>
+            <div class="stat-number">@ticketsAbiertos</div>
+            <div class="stat-label">Abiertos</div>
+        </div>
+
+        <div class="stat-card warning">
+            <div class="stat-header">
+                <div class="stat-icon" style="background: rgba(255, 193, 7, 0.1); color: #856404;" aria-hidden="true">
+                    <i class="fas fa-cog"></i>
+                </div>
+            </div>
+            <div class="stat-number">@ticketsEnProceso</div>
+            <div class="stat-label">En Proceso</div>
+        </div>
+
+        <div class="stat-card success">
+            <div class="stat-header">
+                <div class="stat-icon" style="background: rgba(40, 167, 69, 0.1); color: #28a745;" aria-hidden="true">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+            </div>
+            <div class="stat-number">@ticketsResueltos</div>
+            <div class="stat-label">Resueltos</div>
+        </div>
+    </section>
+
+    <!-- Controls -->
+    <section class="controls-section fade-in">
+        <div class="controls-header">
+            <div class="filter-section">
+                <label class="filter-label" for="estadoFilter">
+                    <i class="fas fa-filter me-2" aria-hidden="true"></i>Filtrar por Estado:
+                </label>
+                <form method="get" action="@Url.Action("Index", "Ticket")" class="d-flex align-items-center gap-3">
+                    <select name="estado" id="estadoFilter" class="form-select" style="width: 200px;" onchange="this.form.submit()">
+                        <option value="Todos">Todos los Estados</option>
+                        @if (estadosSelectList != null)
+                        {
+                            @foreach (var estado in estadosSelectList)
+                            {
+                                if (estadoFiltro == estado.Text)
+                                {
+                                    <option value="@estado.Text" selected>@estado.Text</option>
+                                }
+                                else
+                                {
+                                    <option value="@estado.Text">@estado.Text</option>
+                                }
+                            }
+                        }
+                    </select>
+                </form>
+            </div>
+
+            <a class="btn-gestper" href="@Url.Action("Create", "Ticket")" role="button">
+                <i class="fas fa-plus" aria-hidden="true"></i>
+                <span>Nuevo Ticket</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- Tickets Container -->
+    <section class="tickets-container fade-in" aria-label="Lista de tickets">
         @if (Model != null && Model.Any())
         {
-            <div class="table-responsive">
-                <table class="table table-striped table-bordered">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Título</th>
-                            <th>Descripción</th>
-                            <th>Estado</th>
-                            <th>Fecha</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var ticket in Model)
-                        {
-                            <tr>
-                                <td>@ticket.Titulo</td>
-                                <td>@ticket.Descripcion</td>
-                                <td>
-                                    @{
-                                        string badgeClass = ticket.Estado?.NombreEstado switch
-                                        {
-                                            "Abierto" => "bg-info",
-                                            "En Proceso" => "bg-warning text-dark",
-                                            "Resuelto" => "bg-success",
-                                            "Cerrado" => "bg-secondary",
-                                            _ => "bg-light text-dark"
-                                        };
-                                    }
-                                    <span class="badge @badgeClass">@ticket.Estado?.NombreEstado</span>
-                                </td>
-                                <td>@ticket.FechaCreacion.ToString("dd-MM-yyyy HH:mm")</td>
-                                <td>
-                                    <a href="/Ticket/Details/@ticket.IdTicket" class="btn btn-sm btn-info me-1">Ver</a>
-                                    <a href="/Ticket/Edit/@ticket.IdTicket" class="btn btn-sm btn-warning me-1">Editar</a>
-                                    <form asp-action="Delete" asp-controller="Ticket" asp-route-id="@ticket.IdTicket" method="post" style="display:inline;" onsubmit="return confirm('¿Está seguro de eliminar este ticket?');">
-                                        <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
-                                    </form>
-
-
-                                </td>
-                            </tr>
+            @foreach (var ticket in Model)
+            {
+                <article class="ticket-card">
+                    <header class="ticket-header">
+                        <div>
+                            <h2 class="ticket-title">@(ticket.Titulo ?? "Sin título")</h2>
+                            <div class="ticket-id">#@ticket.IdTicket</div>
+                        </div>
+                        @{
+                            string statusClass = (ticket.Estado?.NombreEstado) switch
+                            {
+                                "Abierto" => "status-abierto",
+                                "En Proceso" => "status-proceso",
+                                "Resuelto" => "status-resuelto",
+                                "Cerrado" => "status-cerrado",
+                                _ => "status-abierto"
+                            };
                         }
-                    </tbody>
-                </table>
-            </div>
+                        <span class="status-badge @statusClass">
+                                @(ticket.Estado?.NombreEstado ?? "Sin estado")
+                            </span>
+                    </header>
+
+                    <div class="ticket-description">
+                        @(ticket.Descripcion ?? "Sin descripción disponible")
+                    </div>
+
+                    <div class="ticket-meta">
+                        <div class="ticket-date">
+                            <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                            <time datetime="@ticket.FechaCreacion.ToString("yyyy-MM-dd")">
+                                @ticket.FechaCreacion.ToString("dd/MM/yyyy HH:mm")
+                            </time>
+                        </div>
+                    </div>
+
+                    <footer class="ticket-actions">
+                        <a href="@Url.Action("Details", "Ticket", new { id = ticket.IdTicket })"
+                           class="btn-action btn-view"
+                           aria-label="Ver detalles del ticket #@ticket.IdTicket">
+                            <i class="fas fa-eye" aria-hidden="true"></i>
+                            <span>Ver Detalles</span>
+                        </a>
+                        <a href="@Url.Action("Edit", "Ticket", new { id = ticket.IdTicket })"
+                           class="btn-action btn-edit"
+                           aria-label="Editar ticket #@ticket.IdTicket">
+                            <i class="fas fa-edit" aria-hidden="true"></i>
+                            <span>Editar</span>
+                        </a>
+                        <form action="@Url.Action("Delete", "Ticket", new { id = ticket.IdTicket })"
+                              method="post" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn-action btn-delete"
+                                    onclick="return confirm('¿Está seguro de eliminar este ticket?')"
+                                    aria-label="Eliminar ticket #@ticket.IdTicket">
+                                <i class="fas fa-trash" aria-hidden="true"></i>
+                                <span>Eliminar</span>
+                            </button>
+                        </form>
+                    </footer>
+                </article>
+            }
         }
         else
         {
-            <div class="alert alert-info text-center mt-4">
-                <i class="bi bi-info-circle"></i> No hay tickets disponibles.
+            <div class="empty-state">
+                <div class="empty-icon" aria-hidden="true">
+                    <i class="fas fa-ticket-alt"></i>
+                </div>
+                <h2 class="empty-title">No hay tickets disponibles</h2>
+                <div class="empty-description">
+                    @if (estadoFiltro != "Todos")
+                    {
+                        <p>No se encontraron tickets con el estado "@estadoFiltro".</p>
+                    }
+                    else
+                    {
+                        <p>Aún no has creado ningún ticket. ¡Crea tu primer ticket para comenzar!</p>
+                    }
+                </div>
+                <a class="btn-gestper" href="@Url.Action("Create", "Ticket")" role="button">
+                    <i class="fas fa-plus" aria-hidden="true"></i>
+                    <span>Crear mi primer ticket</span>
+                </a>
             </div>
         }
-    </div>
+    </section>
+</main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Scripts -->
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    'use strict';
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animación de entrada para las tarjetas
+        const cards = document.querySelectorAll('.ticket-card');
+        cards.forEach(function(card, index) {
+            card.style.animationDelay = (index * 0.1) + 's';
+            card.classList.add('fade-in');
+        });
+
+        // Efecto hover mejorado para las tarjetas
+        cards.forEach(function(card) {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-8px) scale(1.02)';
+            });
+
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Manejo de errores de imágenes
+        const images = document.querySelectorAll('img');
+        images.forEach(function(img) {
+            img.addEventListener('error', function() {
+                console.warn('Error al cargar imagen:', this.src);
+            });
+        });
+
+        // Mejorar accesibilidad del teclado
+        const interactiveElements = document.querySelectorAll('a, button, select');
+        interactiveElements.forEach(function(element) {
+            element.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    if (this.tagName === 'A') {
+                        window.location.href = this.href;
+                    } else if (this.tagName === 'BUTTON') {
+                        this.click();
+                    }
+                }
+            });
+        });
+    });
+</script>
 </body>
 </html>
