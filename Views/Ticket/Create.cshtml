@@ -103,6 +103,21 @@
             color: #0d6efd;
         }
 
+        .btn-logout {
+            padding: 8px 16px;
+            font-size: 0.875rem;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
         .card {
             background-color: white;
             border-radius: 12px;
@@ -276,6 +291,12 @@
             .btn {
                 width: 100%;
             }
+
+            .navbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
         }
     </style>
 </head>
@@ -304,6 +325,12 @@
             <h1 class="page-title">
                 <i class="bi bi-ticket-perforated-fill"></i> Crear Nuevo Ticket
             </h1>
+            
+            <form method="post" asp-controller="Usuario" asp-action="CerrarSesion">
+                <button type="submit" class="btn btn-danger btn-logout">
+                    <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+                </button>
+            </form>
         </div>
 
         <div class="card">
