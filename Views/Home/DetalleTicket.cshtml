@@ -90,12 +90,29 @@
 
                                 <div class="mb-4">
                                     <label class="form-label">Título</label>
-                                    <input type="text" class="form-control" name="Titulo" value="@Model.Titulo" />
+                                    @if (rol == "1" || rol == "2")
+                                    {
+                                        <input type="text" class="form-control" value="@Model.Titulo" readonly 
+                                               style="pointer-events: none; user-select: none;" tabindex="-1" />
+                                        <input type="hidden" name="Titulo" value="@Model.Titulo" />
+                                    }
+                                    else
+                                    {
+                                        <input type="text" class="form-control" name="Titulo" value="@Model.Titulo" />
+                                    }
                                 </div>
 
                                 <div class="mb-4">
                                     <label class="form-label">Descripción</label>
-                                    <textarea class="form-control" name="Descripcion" rows="4">@Model.Descripcion</textarea>
+                                    @if (rol == "1" || rol == "2")
+                                    {
+                                        <textarea class="form-control" rows="4" readonly style="pointer-events: none; user-select: none;" tabindex="-1">@Model.Descripcion</textarea>
+                                        <input type="hidden" name="Descripcion" value="@Model.Descripcion" />
+                                    }
+                                    else
+                                    {
+                                        <textarea class="form-control" name="Descripcion" rows="4">@Model.Descripcion</textarea>
+                                    }
                                 </div>
 
                                 <div class="mb-4">
