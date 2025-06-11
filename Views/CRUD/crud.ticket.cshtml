@@ -801,22 +801,6 @@
                                 <i class="fas fa-eye" aria-hidden="true"></i>
                                 <span>Ver Detalles</span>
                             </a>
-                            <a href="@Url.Action("Edit", "Ticket", new { id = ticket.IdTicket })"
-                               class="btn-action btn-edit"
-                               aria-label="Editar ticket #@ticket.IdTicket">
-                                <i class="fas fa-edit" aria-hidden="true"></i>
-                                <span>Editar</span>
-                            </a>
-                            <form action="@Url.Action("Delete", "Ticket", new { id = ticket.IdTicket })"
-                                  method="post" style="display:inline;">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn-action btn-delete"
-                                        onclick="return confirm('¿Está seguro de eliminar este ticket?')"
-                                        aria-label="Eliminar ticket #@ticket.IdTicket">
-                                    <i class="fas fa-trash" aria-hidden="true"></i>
-                                    <span>Eliminar</span>
-                                </button>
-                            </form>
                         </footer>
                     </article>
                 }
