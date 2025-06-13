@@ -1,72 +1,137 @@
 @model Gestper.Models.Usuario
 
-@if (TempData["MensajeExito"] != null)
-{
-    <div class="alert alert-success text-center fw-semibold">
-        @TempData["MensajeExito"]
-    </div>
+@{ViewData["Title"] = "Editar Usuario";
+
 }
 
-<div class="container d-flex justify-content-center mt-5">
-    <div class="card shadow-lg border-0 rounded-4" style="width: 100%; max-width: 750px;">
-        <div class="card-header bg-primary text-white text-center rounded-top-4">
-            <h2 class="mb-0">Editar Perfil</h2>
-        </div>
-        <div class="card-body px-5 py-4">
-            <form asp-action="Editar" asp-controller="Perfil" method="post">
-                @Html.AntiForgeryToken()
-                <input type="hidden" asp-for="IdUsuario" />
-                <input type="hidden" asp-for="Contrasena" />
-                <input type="hidden" asp-for="IdRol" />
-                <input type="hidden" asp-for="Activo" />
-
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <label asp-for="Nombre" class="form-label fw-semibold">Nombre</label>
-                        <input asp-for="Nombre" class="form-control form-control-lg" />
-                        <span asp-validation-for="Nombre" class="text-danger"></span>
-                    </div>
-                    <div class="col-md-6">
-                        <label asp-for="Apellido" class="form-label fw-semibold">Apellido</label>
-                        <input asp-for="Apellido" class="form-control form-control-lg" />
-                        <span asp-validation-for="Apellido" class="text-danger"></span>
-                    </div>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-primary text-white text-center rounded-top-4">
+                    <h2 class="mb-0"><i class="bi bi-person-gear"></i> Editar Usuario</h2>
                 </div>
+                <div class="card-body px-4 py-4">
+                    @if (!string.IsNullOrEmpty(ViewBag.MensajeExito as string))
+                    {
+                        <div class="alert alert-success text-center fw-semibold">
+                            @ViewBag.MensajeExito
+                        </div>
+                    }
+                    
+                    @if (!string.IsNullOrEmpty(ViewBag.MensajeError as string))
+                    {
+                        <div class="alert alert-danger text-center fw-semibold">
+                            @ViewBag.MensajeError
+                        </div>
+                    }
 
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <label asp-for="Correo" class="form-label fw-semibold">Correo Electrónico</label>
-                        <input asp-for="Correo" class="form-control form-control-lg" type="email" />
-                        <span asp-validation-for="Correo" class="text-danger"></span>
-                    </div>
-                    <div class="col-md-6">
-                        <label asp-for="Telefono" class="form-label fw-semibold">Teléfono</label>
-                        <input asp-for="Telefono" class="form-control form-control-lg" />
-                        <span asp-validation-for="Telefono" class="text-danger"></span>
-                    </div>
-                </div>
+                    <form asp-controller="CRUD" asp-action="Edit" method="post" id="usuarioForm">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="IdUsuario" />
+                        <input type="hidden" asp-for="IdRol" />
+                        <input type="hidden" asp-for="Activo" />
+                        <input type="hidden" asp-for="IdDepartamento" />
+                        <input type="hidden" asp-for="Contrasena" />
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Nombre" class="form-label fw-semibold">Nombre</label>
+                                <input asp-for="Nombre" class="form-control" />
+                                <span asp-validation-for="Nombre" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Apellido" class="form-label fw-semibold">Apellido</label>
+                                <input asp-for="Apellido" class="form-control" />
+                                <span asp-validation-for="Apellido" class="text-danger"></span>
+                            </div>
+                        </div>
 
-                <div class="text-center mt-4">
-                    <button type="submit" class="btn btn-success btn-lg me-2 px-4">
-                        <i class="bi bi-save"></i> Guardar
-                    </button>
-                    <button type="button" onclick="cancelarEdicion()" class="btn btn-outline-secondary btn-lg px-4">
-                        <i class="bi bi-x-circle"></i> Cancelar
-                    </button>
+                        <div class="mb-3">
+                            <label asp-for="Correo" class="form-label fw-semibold">Correo</label>
+                            <input asp-for="Correo" class="form-control" id="correoInput" />
+                            <span asp-validation-for="Correo" class="text-danger"></span>
+                            <div id="correoError" class="text-danger" style="display:none;">
+                                El formato del correo electrónico no es válido
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Telefono" class="form-label fw-semibold">Teléfono</label>
+                            <input asp-for="Telefono" class="form-control" id="telefonoInput" />
+                            <span asp-validation-for="Telefono" class="text-danger"></span>
+                            <div id="telefonoError" class="text-danger" style="display:none;">
+                                El teléfono debe contener solo números
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="bi bi-save"></i> Guardar Cambios
+                            </button>
+                            <a asp-action="Perfil" asp-controller="CRUD" class="btn btn-secondary btn-lg ms-2">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        $(document).ready(function() {
+            // Validación de correo electrónico
+            $('#correoInput').on('input', function() {
+                const correo = $(this).val();
+                const regex = /^[a-zA-Z0-9._%+-]+@@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                
+                if (correo && !regex.test(correo)) {
+                    $('#correoError').show();
+                } else {
+                    $('#correoError').hide();
+                }
+            });
+            
+            // Validación de teléfono
+            $('#telefonoInput').on('input', function() {
+                const telefono = $(this).val();
+                const regex = /^\+?[0-9]{6,15}$/;
+                
+                if (telefono && !regex.test(telefono)) {
+                    $('#telefonoError').show();
+                } else {
+                    $('#telefonoError').hide();
+                }
+            });
+            
+            // Validación del formulario antes de enviar
+            $('#usuarioForm').on('submit', function(e) {
+                const correo = $('#correoInput').val();
+                const telefono = $('#telefonoInput').val();
+                const correoRegex = /^[a-zA-Z0-9._%+-]+@@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                const telefonoRegex = /^\+?[0-9]{6,15}$/;
+                
+                let isValid = true;
+                
+                if (correo && !correoRegex.test(correo)) {
+                    $('#correoError').show();
+                    isValid = false;
+                }
+                
+                if (telefono && !telefonoRegex.test(telefono)) {
+                    $('#telefonoError').show();
+                    isValid = false;
+                }
+                
+                if (!isValid) {
+                    e.preventDefault(); // Detiene el envío del formulario
+                }
+            });
+        });
+    </script>
 }
-
-<script>
-    function cancelarEdicion() {
-        document.getElementById('editarPerfil').style.display = 'none';
-        document.getElementById('vistaPerfil').style.display = 'block';
-    }
-</script>
-
