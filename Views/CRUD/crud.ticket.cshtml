@@ -726,23 +726,15 @@
                     <label class="filter-label" for="estadoFilter">
                         <i class="fas fa-filter me-2" aria-hidden="true"></i>Filtrar por Estado:
                     </label>
+                    <!-- Filtro por Estado -->
                     <form method="get" action="@Url.Action("Index", "Ticket")" class="d-flex align-items-center gap-3">
                         <select name="estado" id="estadoFilter" class="form-select" style="width: 200px;" onchange="this.form.submit()">
-                            <option value="Todos">Todos los Estados</option>
-                            @if (estadosSelectList != null)
-                            {
-                                @foreach (var estado in estadosSelectList)
-                                {
-                                    if (estadoFiltro == estado.Text)
-                                    {
-                                        <option value="@estado.Text" selected>@estado.Text</option>
-                                    }
-                                    else
-                                    {
-                                        <option value="@estado.Text">@estado.Text</option>
-                                    }
-                                }
-                            }
+                            <option value="">Todos los Estados</option>
+                            <option value="Abierto" selected="@(estadoFiltro == "Abierto")">Abierto</option>
+                            <option value="En Proceso" selected="@(estadoFiltro == "En Proceso")">En Proceso</option>
+                            <option value="Resuelto" selected="@(estadoFiltro == "Resuelto")">Resuelto</option>
+                            <option value="Cerrado" selected="@(estadoFiltro == "Cerrado")">Cerrado</option>
+
                         </select>
                     </form>
                 </div>
