@@ -5,7 +5,6 @@ using Gestper.Data;
 using Microsoft.EntityFrameworkCore;
 using Gestper.Services;
 
-
 namespace Gestper.Controllers
 {
     public class TicketController : Controller
@@ -19,6 +18,33 @@ namespace Gestper.Controllers
             _emailService = emailService;
         }
 
+        // NUEVO MÉTODO INDEX PARA FILTRAR TICKETS POR ESTADO
+        public IActionResult Index(string estado)
+        {
+            var query = _context.Tickets
+                .Include(t => t.Estado)
+                .Include(t => t.Categoria)
+                .Include(t => t.Prioridad)
+                .Include(t => t.Departamento)
+                .AsQueryable();
+
+            // Aplicar filtro si se seleccionó un estado
+            if (!string.IsNullOrEmpty(estado))
+            {
+                query = query.Where(t => t.Estado.NombreEstado == estado);
+            }
+
+            var tickets = query.ToList();
+            
+            // Cargar combos para filtros o formularios
+            ViewBag.Estados = new SelectList(_context.Estados.ToList(), "NombreEstado", "NombreEstado", estado);
+            ViewBag.Categorias = new SelectList(_context.Categorias.ToList(), "IdCategoria", "Nombre");
+            ViewBag.Prioridades = new SelectList(_context.Prioridades.ToList(), "IdPrioridad", "NombrePrioridad");
+            ViewBag.Departamentos = new SelectList(_context.Departamentos.ToList(), "IdDepartamento", "Nombre");
+
+            return View(tickets);
+        }
+
         private int ObtenerIdUsuarioActual()
         {
             var correo = HttpContext.Session.GetString("UsuarioCorreo");
@@ -26,7 +52,6 @@ namespace Gestper.Controllers
             return usuario?.IdUsuario ?? 0;
         }
 
-        // Método centralizado para cargar los combos
         private void CargarCombos(Ticket ticket = null)
         {
             ViewBag.Estados = new SelectList(_context.Estados.ToList(), "IdEstado", "NombreEstado", ticket?.IdEstado);
@@ -53,7 +78,6 @@ namespace Gestper.Controllers
                 return RedirectToAction("Create", "Ticket");
             }
 
-            // Siempre cargamos los combos antes de enviar la vista
             CargarCombos();
             return View("Views/CRUD/crud.ticket.cshtml", ticketsCliente);
         }
@@ -191,6 +215,7 @@ namespace Gestper.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction("MisTickets");
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AgregarSeguimiento(int idTicket, string comentario)

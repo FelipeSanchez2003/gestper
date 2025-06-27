@@ -8,7 +8,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8"/>
     <title>Crear Ticket</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -401,5 +401,86 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Configurar mensajes de validación en español
+            $.validator.addMethod("required", function(value, element, param) {
+                return this.depend(param, element) && value.length > 0;
+            });
+
+            // Personalizar mensajes de validación
+            $.validator.messages = {
+                required: function(param, element) {
+                    var fieldName = $(element).attr('name');
+                    switch(fieldName) {
+                        case 'Titulo':
+                            return 'El campo Título es obligatorio.';
+                        case 'Descripcion':
+                            return 'El campo Descripción es obligatorio.';
+                        case 'IdCategoria':
+                            return 'El campo Categoría es obligatorio.';
+                        case 'IdDepartamento':
+                            return 'El campo Departamento es obligatorio.';
+                        default:
+                            return 'Este campo es obligatorio.';
+                    }
+                }
+            };
+
+            // Interceptar y cambiar mensajes después de la validación
+            $('form').on('invalid-form.validate', function() {
+                setTimeout(function() {
+                    // Cambiar mensajes específicos si aparecen en inglés
+                    $('span[data-valmsg-for="Titulo"]').each(function() {
+                        var text = $(this).text();
+                        if (text.includes('Titulo field is required') || text.includes('required')) {
+                            $(this).text('El campo Título es obligatorio.');
+                        }
+                    });
+                    
+                    $('span[data-valmsg-for="Descripcion"]').each(function() {
+                        var text = $(this).text();
+                        if (text.includes('Description field is required') || text.includes('required')) {
+                            $(this).text('El campo Descripción es obligatorio.');
+                        }
+                    });
+                    
+                    $('span[data-valmsg-for="IdCategoria"]').each(function() {
+                        var text = $(this).text();
+                        if (text.includes('IdCategoria field is required') || text.includes('required')) {
+                            $(this).text('El campo Categoría es obligatorio.');
+                        }
+                    });
+                    
+                    $('span[data-valmsg-for="IdDepartamento"]').each(function() {
+                        var text = $(this).text();
+                        if (text.includes('IdDepartamento field is required') || text.includes('required')) {
+                            $(this).text('El campo Departamento es obligatorio.');
+                        }
+                    });
+                }, 100);
+            });
+
+            // También interceptar cuando se envía el formulario
+            $('form').submit(function(e) {
+                setTimeout(function() {
+                    // Cambiar cualquier mensaje que aparezca en inglés
+                    $('.text-danger').each(function() {
+                        var text = $(this).text();
+                        if (text.includes('Titulo field is required')) {
+                            $(this).text('El campo Título es obligatorio.');
+                        } else if (text.includes('Description field is required')) {
+                            $(this).text('El campo Descripción es obligatorio.');
+                        } else if (text.includes('IdCategoria field is required')) {
+                            $(this).text('El campo Categoría es obligatorio.');
+                        } else if (text.includes('IdDepartamento field is required')) {
+                            $(this).text('El campo Departamento es obligatorio.');
+                        }
+                    });
+                }, 100);
+            });
+        });
+    </script>
 </body>
 </html>
