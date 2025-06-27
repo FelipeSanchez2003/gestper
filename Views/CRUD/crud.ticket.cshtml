@@ -1,15 +1,37 @@
 @model List<Gestper.Models.Ticket>
 
 @{
-    Layout = null;
-    var estadoFiltro = ViewBag.EstadoFiltro as string ?? "Todos";
-    var estadosSelectList = ViewBag.Estados as SelectList ?? new SelectList(new List<SelectListItem>());
+Layout = null;
 
-    // Manejo seguro de nulos para evitar warnings de nullable reference types
-    var totalTickets = Model?.Count ?? 0;
-    var ticketsAbiertos = Model?.Where(t => t.Estado?.NombreEstado == "Abierto").Count() ?? 0;
-    var ticketsEnProceso = Model?.Where(t => t.Estado?.NombreEstado == "En Proceso").Count() ?? 0;
-    var ticketsResueltos = Model?.Where(t => t.Estado?.NombreEstado == "Resuelto").Count() ?? 0;
+// Obtener el filtro de estado desde la URL
+var estadoFiltro = Context.Request.Query["estado"].ToString();
+if (string.IsNullOrEmpty(estadoFiltro))
+{
+estadoFiltro = "Todos";
+}
+
+// Obtener el ID del usuario actual desde la sesión (como entero)
+var currentUserId = Context.Session.GetInt32("UsuarioId") ?? 0;
+
+// Filtrar tickets solo del usuario actual
+var ticketsDelUsuario = Model?.Where(t => t.IdUsuario == currentUserId) ?? new List<Gestper.Models.Ticket>();
+
+// Aplicar filtro de estado si está seleccionado
+if (!string.IsNullOrEmpty(estadoFiltro) && estadoFiltro != "Todos")
+{
+ticketsDelUsuario = ticketsDelUsuario.Where(t => t.Estado?.NombreEstado == estadoFiltro);
+}
+
+// Calcular estadísticas solo para tickets del usuario actual (SIN FILTRO para las estadísticas)
+var todosLosTicketsDelUsuario = Model?.Where(t => t.IdUsuario == currentUserId) ?? new List<Gestper.Models.Ticket>();
+var totalTickets = todosLosTicketsDelUsuario.Count();
+var ticketsAbiertos = todosLosTicketsDelUsuario.Where(t => t.Estado?.NombreEstado == "Abierto").Count();
+var ticketsEnProceso = todosLosTicketsDelUsuario.Where(t => t.Estado?.NombreEstado == "En Proceso").Count();
+var ticketsResueltos = todosLosTicketsDelUsuario.Where(t => t.Estado?.NombreEstado == "Resuelto").Count();
+var ticketsCerrados = todosLosTicketsDelUsuario.Where(t => t.Estado?.NombreEstado == "Cerrado").Count();
+
+// Para mostrar en el filtro
+var ticketsFiltrados = ticketsDelUsuario.Count();
 }
 
 <!DOCTYPE html>
@@ -173,6 +195,7 @@
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            cursor: pointer;
         }
 
         .stat-card::before {
@@ -201,9 +224,19 @@
             background: #28a745;
         }
 
+        .stat-card.danger::before {
+            background: #dc3545;
+        }
+
         .stat-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card.active {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border: 2px solid #0074e8;
         }
 
         .stat-header {
@@ -267,19 +300,50 @@
             white-space: nowrap;
         }
 
-        .form-select {
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            padding: 0.75rem 1rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            background-color: #ffffff;
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
         }
 
-        .form-select:focus {
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 20px;
+            background: #ffffff;
+            color: #6c757d;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-btn:hover {
             border-color: #0074e8;
-            box-shadow: 0 0 0 0.2rem rgba(0, 116, 232, 0.25);
-            outline: none;
+            color: #0074e8;
+            text-decoration: none;
+        }
+
+        .filter-btn.active {
+            background: #0074e8;
+            border-color: #0074e8;
+            color: #ffffff;
+        }
+
+        .filter-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.1rem 0.4rem;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .filter-btn.active .filter-count {
+            background: rgba(255, 255, 255, 0.3);
         }
 
         .btn-gestper {
@@ -302,6 +366,21 @@
             color: #ffffff;
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-logout {
+            background: #dc3545;
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            color: white;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            background: #c82333;
+            transform: translateY(-1px);
         }
 
         /* Contenedor de tickets */
@@ -535,84 +614,88 @@
 
         /* Media queries corregidas */
         @@media screen and (max-width: 768px) {
-            .sidebar {
-                width: 70px;
-                overflow: hidden;
-            }
+        .sidebar {
+            width: 70px;
+            overflow: hidden;
+        }
 
-            .sidebar-logo img {
-                max-width: 40px;
-            }
+        .sidebar-logo img {
+            max-width: 40px;
+        }
 
-            .sidebar a span {
-                display: none;
-            }
+        .sidebar a span {
+            display: none;
+        }
 
-            .sidebar a {
-                justify-content: center;
-                padding: 15px;
-            }
+        .sidebar a {
+            justify-content: center;
+            padding: 15px;
+        }
 
-            .sidebar a i {
-                margin-right: 0;
-                font-size: 20px;
-            }
+        .sidebar a i {
+            margin-right: 0;
+            font-size: 20px;
+        }
 
-            .main-content {
-                margin-left: 70px;
-                padding: 1rem;
-            }
+        .main-content {
+            margin-left: 70px;
+            padding: 1rem;
+        }
 
-            .controls-header {
-                flex-direction: column;
-                align-items: stretch;
-            }
+        .controls-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
 
-            .filter-section {
-                flex-direction: column;
-                align-items: stretch;
-            }
+        .filter-section {
+            flex-direction: column;
+            align-items: stretch;
+        }
 
-            .stats-container {
-                grid-template-columns: 1fr;
-            }
+        .stats-container {
+            grid-template-columns: 1fr;
+        }
 
-            .ticket-actions {
-                justify-content: center;
-            }
+        .ticket-actions {
+            justify-content: center;
+        }
 
-            .page-title {
-                flex-direction: column;
-                text-align: center;
-            }
+        .page-title {
+            flex-direction: column;
+            text-align: center;
+        }
 
-            .page-title h1 {
-                font-size: 1.5rem;
-            }
+        .page-title h1 {
+            font-size: 1.5rem;
+        }
+
+        .filter-buttons {
+            justify-content: center;
+        }
         }
 
         @@media screen and (max-width: 480px) {
-            .main-content {
-                padding: 0.5rem;
-            }
+        .main-content {
+            padding: 0.5rem;
+        }
 
-            .page-header {
-                padding: 1rem;
-            }
+        .page-header {
+            padding: 1rem;
+        }
 
-            .stat-card {
-                padding: 1rem;
-            }
+        .stat-card {
+            padding: 1rem;
+        }
 
-            .ticket-card {
-                padding: 1rem;
-            }
+        .ticket-card {
+            padding: 1rem;
+        }
         }
 
         /* Mejoras de accesibilidad */
         .btn-gestper:focus,
         .btn-action:focus,
-        .form-select:focus {
+        .filter-btn:focus {
             outline: 2px solid #0074e8;
             outline-offset: 2px;
         }
@@ -629,247 +712,326 @@
             max-width: 100%;
             height: auto;
         }
+
+        /* Indicador de resultados */
+        .results-indicator {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #0074e8;
+            font-size: 0.9rem;
+            color: #495057;
+        }
     </style>
 </head>
 
 <body>
-    <!-- Sidebar - Extraído de "Crud con barra wena.txt" -->
-    <div class="sidebar">
-        <div class="sidebar-logo">
-            <img src="~/images/logo.png" alt="Logo Gestper" />
-        </div>
-        
-        <a href="/CRUD/Perfil">
-            <i class="bi bi-person"></i>
-            <span>Perfil</span>
-        </a>
-        <a asp-controller="Ticket" asp-action="Create">
-            <i class="bi bi-ticket-perforated"></i>
-            <span>Creación de Ticket</span>
-        </a>
-        <a asp-controller="CRUD" asp-action="TicketsCreados" class="active">
-            <i class="bi bi-list-ul"></i>
-            <span>Lista de mis Tickets</span>
-        </a>
+<!-- Sidebar - Extraído de "Crud con barra wena.txt" -->
+<div class="sidebar">
+    <div class="sidebar-logo">
+        <img src="~/images/logo.png" alt="Logo Gestper" />
     </div>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <!-- Page Header -->
-        <header class="page-header fade-in">
-            <div class="page-title" style="display: flex; justify-content: space-between; align-items: center;">
-                <div style="display: flex; align-items: center;">
-                    <div class="icon" aria-hidden="true">
-                        <i class="fas fa-ticket-alt"></i>
-                    </div>
-                    <div>
-                        <h1>Mis Tickets</h1>
-                        <p class="mb-0 text-muted">Gestiona y da seguimiento a tus solicitudes</p>
-                    </div>
-                </div>
+    <a href="/CRUD/Perfil">
+        <i class="bi bi-person"></i>
+        <span>Perfil</span>
+    </a>
+    <a asp-controller="Ticket" asp-action="Create">
+        <i class="bi bi-ticket-perforated"></i>
+        <span>Creación de Ticket</span>
+    </a>
+    <a asp-controller="CRUD" asp-action="TicketsCreados" class="active">
+        <i class="bi bi-list-ul"></i>
+        <span>Lista de mis Tickets</span>
+    </a>
+</div>
 
-                <form method="post" asp-controller="Usuario" asp-action="CerrarSesion" style="margin-left: 20px;">
-                    <button type="submit" class="btn btn-danger btn-logout">
-                        <i class="bi bi-box-arrow-right"></i> Cerrar sesión
-                    </button>
-                </form>
-            </div>
-        </header>
-
-        <!-- Stats Cards -->
-        <section class="stats-container fade-in" aria-label="Estadísticas de tickets">
-            <div class="stat-card primary">
-                <div class="stat-header">
-                    <div class="stat-icon" style="background: #e6eeff; color: #0074e8;" aria-hidden="true">
-                        <i class="fas fa-ticket-alt"></i>
-                    </div>
+<!-- Main Content -->
+<main class="main-content">
+    <!-- Page Header -->
+    <header class="page-header fade-in">
+        <div class="page-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center;">
+                <div class="icon" aria-hidden="true">
+                    <i class="fas fa-ticket-alt"></i>
                 </div>
-                <div class="stat-number">@totalTickets</div>
-                <div class="stat-label">Total de Tickets</div>
+                <div>
+                    <h1>Mis Tickets</h1>
+                    <p class="mb-0 text-muted">Gestiona y da seguimiento a tus solicitudes</p>
+                </div>
             </div>
 
-            <div class="stat-card info">
-                <div class="stat-header">
-                    <div class="stat-icon" style="background: rgba(23, 162, 184, 0.1); color: #17a2b8;" aria-hidden="true">
+            <form method="post" asp-controller="Usuario" asp-action="CerrarSesion" style="margin-left: 20px;">
+                <button type="submit" class="btn btn-danger btn-logout">
+                    <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+                </button>
+            </form>
+        </div>
+    </header>
+
+    <!-- Stats Cards (Clickeables para filtrar) -->
+    <section class="stats-container fade-in" aria-label="Estadísticas de tickets">
+        <div class="stat-card primary @(estadoFiltro == "Todos" ? "active" : "")" onclick="filtrarPorEstado('Todos')">
+            <div class="stat-header">
+                <div class="stat-icon" style="background: #e6eeff; color: #0074e8;" aria-hidden="true">
+                    <i class="fas fa-ticket-alt"></i>
+                </div>
+            </div>
+            <div class="stat-number">@totalTickets</div>
+            <div class="stat-label">Total de Tickets</div>
+        </div>
+
+        <div class="stat-card info @(estadoFiltro == "Abierto" ? "active" : "")" onclick="filtrarPorEstado('Abierto')">
+            <div class="stat-header">
+                <div class="stat-icon" style="background: rgba(23, 162, 184, 0.1); color: #17a2b8;" aria-hidden="true">
+                    <i class="fas fa-clock"></i>
+                </div>
+            </div>
+            <div class="stat-number">@ticketsAbiertos</div>
+            <div class="stat-label">Abiertos</div>
+        </div>
+
+        <div class="stat-card warning @(estadoFiltro == "En Proceso" ? "active" : "")" onclick="filtrarPorEstado('En Proceso')">
+            <div class="stat-header">
+                <div class="stat-icon" style="background: rgba(255, 193, 7, 0.1); color: #856404;" aria-hidden="true">
+                    <i class="fas fa-cog"></i>
+                </div>
+            </div>
+            <div class="stat-number">@ticketsEnProceso</div>
+            <div class="stat-label">En Proceso</div>
+        </div>
+
+        <div class="stat-card success @(estadoFiltro == "Resuelto" ? "active" : "")" onclick="filtrarPorEstado('Resuelto')">
+            <div class="stat-header">
+                <div class="stat-icon" style="background: rgba(40, 167, 69, 0.1); color: #28a745;" aria-hidden="true">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+            </div>
+            <div class="stat-number">@ticketsResueltos</div>
+            <div class="stat-label">Resueltos</div>
+        </div>
+
+        <div class="stat-card danger @(estadoFiltro == "Cerrado" ? "active" : "")" onclick="filtrarPorEstado('Cerrado')">
+            <div class="stat-header">
+                <div class="stat-icon" style="background: rgba(220, 53, 69, 0.1); color: #dc3545;" aria-hidden="true">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+            </div>
+            <div class="stat-number">@ticketsCerrados</div>
+            <div class="stat-label">Cerrados</div>
+        </div>
+    </section>
+
+    <!-- Controls -->
+    <section class="controls-section fade-in">
+        <div class="controls-header">
+            <div class="filter-section">
+                <label class="filter-label">
+                    <i class="fas fa-filter me-2" aria-hidden="true"></i>Filtros rápidos:
+                </label>
+                <div class="filter-buttons">
+                    <a href="?estado=Todos" class="filter-btn @(estadoFiltro == "Todos" ? "active" : "")">
+                        <i class="fas fa-list"></i>
+                        Todos
+                        <span class="filter-count">@totalTickets</span>
+                    </a>
+                    <a href="?estado=Abierto" class="filter-btn @(estadoFiltro == "Abierto" ? "active" : "")">
                         <i class="fas fa-clock"></i>
-                    </div>
-                </div>
-                <div class="stat-number">@ticketsAbiertos</div>
-                <div class="stat-label">Abiertos</div>
-            </div>
-
-            <div class="stat-card warning">
-                <div class="stat-header">
-                    <div class="stat-icon" style="background: rgba(255, 193, 7, 0.1); color: #856404;" aria-hidden="true">
+                        Abiertos
+                        <span class="filter-count">@ticketsAbiertos</span>
+                    </a>
+                    <a href="?estado=En Proceso" class="filter-btn @(estadoFiltro == "En Proceso" ? "active" : "")">
                         <i class="fas fa-cog"></i>
-                    </div>
-                </div>
-                <div class="stat-number">@ticketsEnProceso</div>
-                <div class="stat-label">En Proceso</div>
-            </div>
-
-            <div class="stat-card success">
-                <div class="stat-header">
-                    <div class="stat-icon" style="background: rgba(40, 167, 69, 0.1); color: #28a745;" aria-hidden="true">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                </div>
-                <div class="stat-number">@ticketsResueltos</div>
-                <div class="stat-label">Resueltos</div>
-            </div>
-        </section>
-
-        <!-- Controls -->
-        <section class="controls-section fade-in">
-            <div class="controls-header">
-                <div class="filter-section">
-                    <label class="filter-label" for="estadoFilter">
-                        <i class="fas fa-filter me-2" aria-hidden="true"></i>Filtrar por Estado:
-                    </label>
-                    <!-- Filtro por Estado -->
-                    <form method="get" action="@Url.Action("Index", "Ticket")" class="d-flex align-items-center gap-3">
-                        <select name="estado" id="estadoFilter" class="form-select" style="width: 200px;" onchange="this.form.submit()">
-                            <option value="">Todos los Estados</option>
-                            <option value="Abierto" selected="@(estadoFiltro == "Abierto")">Abierto</option>
-                            <option value="En Proceso" selected="@(estadoFiltro == "En Proceso")">En Proceso</option>
-                            <option value="Resuelto" selected="@(estadoFiltro == "Resuelto")">Resuelto</option>
-                            <option value="Cerrado" selected="@(estadoFiltro == "Cerrado")">Cerrado</option>
-
-                        </select>
-                    </form>
-                </div>
-
-                <a class="btn-gestper" href="@Url.Action("Create", "Ticket")" role="button">
-                    <i class="fas fa-plus" aria-hidden="true"></i>
-                    <span>Nuevo Ticket</span>
-                </a>
-            </div>
-        </section>
-
-        <!-- Tickets Container -->
-        <section class="tickets-container fade-in" aria-label="Lista de tickets">
-            @if (Model != null && Model.Any())
-            {
-                @foreach (var ticket in Model)
-                {
-                    <article class="ticket-card">
-                        <header class="ticket-header">
-                            <div>
-                                <h2 class="ticket-title">@(ticket.Titulo ?? "Sin título")</h2>
-                                <div class="ticket-id">#@ticket.IdTicket</div>
-                            </div>
-                            @{
-                                string statusClass = (ticket.Estado?.NombreEstado) switch
-                                {
-                                    "Abierto" => "status-abierto",
-                                    "En Proceso" => "status-proceso",
-                                    "Resuelto" => "status-resuelto",
-                                    "Cerrado" => "status-cerrado",
-                                    _ => "status-abierto"
-                                };
-                            }
-                            <span class="status-badge @statusClass">
-                                    @(ticket.Estado?.NombreEstado ?? "Sin estado")
-                                </span>
-                        </header>
-
-                        <div class="ticket-description">
-                            @(ticket.Descripcion ?? "Sin descripción disponible")
-                        </div>
-
-                        <div class="ticket-meta">
-                            <div class="ticket-date">
-                                <i class="fas fa-calendar-alt" aria-hidden="true"></i>
-                                <time datetime="@ticket.FechaCreacion.ToString("yyyy-MM-dd")">
-                                    @ticket.FechaCreacion.ToString("dd/MM/yyyy HH:mm")
-                                </time>
-                            </div>
-                        </div>
-
-                        <footer class="ticket-actions">
-                            <a href="@Url.Action("Details", "Ticket", new { id = ticket.IdTicket })"
-                               class="btn-action btn-view"
-                               aria-label="Ver detalles del ticket #@ticket.IdTicket">
-                                <i class="fas fa-eye" aria-hidden="true"></i>
-                                <span>Ver Detalles</span>
-                            </a>
-                        </footer>
-                    </article>
-                }
-            }
-            else
-            {
-                <div class="empty-state">
-                    <div class="empty-icon" aria-hidden="true">
-                        <i class="fas fa-ticket-alt"></i>
-                    </div>
-                    <h2 class="empty-title">No hay tickets disponibles</h2>
-                    <div class="empty-description">
-                        @if (estadoFiltro != "Todos")
-                        {
-                            <p>No se encontraron tickets con el estado "@estadoFiltro".</p>
-                        }
-                        else
-                        {
-                            <p>Aún no has creado ningún ticket. ¡Crea tu primer ticket para comenzar!</p>
-                        }
-                    </div>
-                    <a class="btn-gestper" href="@Url.Action("Create", "Ticket")" role="button">
-                        <i class="fas fa-plus" aria-hidden="true"></i>
-                        <span>Crear mi primer ticket</span>
+                        En Proceso
+                        <span class="filter-count">@ticketsEnProceso</span>
+                    </a>
+                    <a href="?estado=Resuelto" class="filter-btn @(estadoFiltro == "Resuelto" ? "active" : "")">
+                        <i class="fas fa-check"></i>
+                        Resueltos
+                        <span class="filter-count">@ticketsResueltos</span>
+                    </a>
+                    <a href="?estado=Cerrado" class="filter-btn @(estadoFiltro == "Cerrado" ? "active" : "")">
+                        <i class="fas fa-times"></i>
+                        Cerrados
+                        <span class="filter-count">@ticketsCerrados</span>
                     </a>
                 </div>
-            }
-        </section>
-    </main>
+            </div>
 
-    <!-- Scripts -->
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+            <a class="btn-gestper" href="@Url.Action("Create", "Ticket")" role="button">
+                <i class="fas fa-plus" aria-hidden="true"></i>
+                <span>Nuevo Ticket</span>
+            </a>
+        </div>
+    </section>
 
-    <script>
-        'use strict';
+    <!-- Indicador de resultados -->
+    @if (estadoFiltro != "Todos")
+    {
+    <div class="results-indicator">
+        <i class="fas fa-info-circle me-2"></i>
+        Mostrando @ticketsFiltrados tickets con estado "@estadoFiltro" de un total de @totalTickets tickets.
+        <a href="?estado=Todos" style="color: #0074e8; text-decoration: none; margin-left: 10px;">
+            <i class="fas fa-times"></i> Limpiar filtro
+        </a>
+    </div>
+    }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // Animación de entrada para las tarjetas
-            const cards = document.querySelectorAll('.ticket-card');
-            cards.forEach(function(card, index) {
-                card.style.animationDelay = (index * 0.1) + 's';
-                card.classList.add('fade-in');
+    <!-- Tickets Container -->
+    <section class="tickets-container fade-in" aria-label="Lista de tickets">
+        @if (ticketsDelUsuario.Any())
+        {
+        @foreach (var ticket in ticketsDelUsuario)
+        {
+        <article class="ticket-card">
+            <header class="ticket-header">
+                <div>
+                    <h2 class="ticket-title">@(ticket.Titulo ?? "Sin título")</h2>
+                    <div class="ticket-id">#@ticket.IdTicket</div>
+                </div>
+                @{
+                string statusClass = (ticket.Estado?.NombreEstado) switch
+                {
+                "Abierto" => "status-abierto",
+                "En Proceso" => "status-proceso",
+                "Resuelto" => "status-resuelto",
+                "Cerrado" => "status-cerrado",
+                _ => "status-abierto"
+                };
+                }
+                <span class="status-badge @statusClass">
+                                    @(ticket.Estado?.NombreEstado ?? "Sin estado")
+                                </span>
+            </header>
+
+            <div class="ticket-description">
+                @(ticket.Descripcion ?? "Sin descripción disponible")
+            </div>
+
+            <div class="ticket-meta">
+                <div class="ticket-date">
+                    <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                    <time datetime="@ticket.FechaCreacion.ToString("yyyy-MM-dd")">
+                        @ticket.FechaCreacion.ToString("dd/MM/yyyy HH:mm")
+                    </time>
+                </div>
+            </div>
+
+            <footer class="ticket-actions">
+                <a href="@Url.Action("Details", "Ticket", new { id = ticket.IdTicket })"
+                   class="btn-action btn-view"
+                   aria-label="Ver detalles del ticket #@ticket.IdTicket">
+                    <i class="fas fa-eye" aria-hidden="true"></i>
+                    <span>Ver Detalles</span>
+                </a>
+            </footer>
+        </article>
+        }
+        }
+        else
+        {
+        <div class="empty-state">
+            <div class="empty-icon" aria-hidden="true">
+                <i class="fas fa-ticket-alt"></i>
+            </div>
+            <h2 class="empty-title">No hay tickets disponibles</h2>
+            <div class="empty-description">
+                @if (!string.IsNullOrEmpty(estadoFiltro) && estadoFiltro != "Todos")
+                {
+                <p>No tienes tickets con el estado "@estadoFiltro".</p>
+                <p>Prueba cambiando el filtro o crea un nuevo ticket.</p>
+                }
+                else
+                {
+                <p>Aún no has creado ningún ticket. ¡Crea tu primer ticket para comenzar!</p>
+                }
+            </div>
+            <a class="btn-gestper" href="@Url.Action("Create", "Ticket")" role="button">
+                <i class="fas fa-plus" aria-hidden="true"></i>
+                <span>Crear mi primer ticket</span>
+            </a>
+        </div>
+        }
+    </section>
+</main>
+
+<!-- Scripts -->
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    'use strict';
+
+    // Función para filtrar por estado
+    function filtrarPorEstado(estado) {
+        const url = new URL(window.location);
+        url.searchParams.set('estado', estado);
+        window.location.href = url.toString();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animación de entrada para las tarjetas
+        const cards = document.querySelectorAll('.ticket-card');
+        cards.forEach(function(card, index) {
+            card.style.animationDelay = (index * 0.1) + 's';
+            card.classList.add('fade-in');
+        });
+
+        // Efecto hover mejorado para las tarjetas
+        cards.forEach(function(card) {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-8px) scale(1.02)';
             });
 
-            // Efecto hover mejorado para las tarjetas
-            cards.forEach(function(card) {
-                card.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateY(-8px) scale(1.02)';
-                });
-
-                card.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateY(0) scale(1)';
-                });
-            });
-
-            // Manejo de errores de imágenes
-            const images = document.querySelectorAll('img');
-            images.forEach(function(img) {
-                img.addEventListener('error', function() {
-                    console.warn('Error al cargar imagen:', this.src);
-                });
-            });
-
-            // Mejorar accesibilidad del teclado
-            const interactiveElements = document.querySelectorAll('a, button, select');
-            interactiveElements.forEach(function(element) {
-                element.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        if (this.tagName === 'A') {
-                            window.location.href = this.href;
-                        } else if (this.tagName === 'BUTTON') {
-                            this.click();
-                        }
-                    }
-                });
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
             });
         });
-    </script>
+
+        // Efecto hover para las tarjetas de estadísticas
+        const statCards = document.querySelectorAll('.stat-card');
+        statCards.forEach(function(card) {
+            card.addEventListener('mouseenter', function() {
+                if (!this.classList.contains('active')) {
+                    this.style.transform = 'translateY(-3px)';
+                }
+            });
+
+            card.addEventListener('mouseleave', function() {
+                if (!this.classList.contains('active')) {
+                    this.style.transform = 'translateY(0)';
+                }
+            });
+        });
+
+        // Manejo de errores de imágenes
+        const images = document.querySelectorAll('img');
+        images.forEach(function(img) {
+            img.addEventListener('error', function() {
+                console.warn('Error al cargar imagen:', this.src);
+            });
+        });
+
+        // Mejorar accesibilidad del teclado
+        const interactiveElements = document.querySelectorAll('a, button, .stat-card');
+        interactiveElements.forEach(function(element) {
+            element.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    if (this.tagName === 'A') {
+                        window.location.href = this.href;
+                    } else if (this.tagName === 'BUTTON') {
+                        this.click();
+                    } else if (this.classList.contains('stat-card')) {
+                        this.click();
+                    }
+                }
+            });
+        });
+
+        // Mostrar estado actual del filtro en consola (para debug)
+        console.log('Estado del filtro actual:', '@estadoFiltro');
+        console.log('Tickets mostrados:', @ticketsFiltrados);
+    });
+</script>
 </body>
 </html>
